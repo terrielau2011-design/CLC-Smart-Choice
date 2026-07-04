@@ -4,8 +4,11 @@
 /* UI: Old-style card layout with tag filtering */
 /* Data: from __embeddedData__ in data.js */
 
-/* ========== Tag Rules (static) ========== */
+/* ========== Tag Rules (static, matches old version) ========== */
+/* Tags shown in old version order; "短期儲蓄" and "教育基金" have no products but are kept for UI consistency */
 var TAG_RULES = {
+  '整付入場': 'pay_term = 0（躉繳/整付）',
+  '分期入場': 'pay_term ≥ 1 且 pay_term ≤ 10（分期繳費）',
   '高淨值資產配置': 'min_prem ≥ 100000、支持保費融資、美元計價產品優先',
   '跨境財富規劃': '幣種包含USD、可離岸資產配置、終身分紅壽險',
   '槓桿融資': 'finance_support = 是，支持保費融資計劃',
@@ -13,8 +16,6 @@ var TAG_RULES = {
   '資產傳承': 'life_type = 終身儲蓄，具備身故傳承價值',
   '穩定收益': 'guarantee = 是，保證回報佔比高',
   '退休規劃': '長期持有價值高、20年期IRR表現優、適合長線持有',
-  '整付入場': 'pay_term = 0（躉繳/整付）',
-  '分期入場': 'pay_term ≥ 1 且 pay_term ≤ 10（分期繳費）',
   '教育基金': '中期回本、彈性提取現金價值、適合10–20年規劃',
   '小額入場': 'min_prem ＜ 20000，低門檻投保'
 };
