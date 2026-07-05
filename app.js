@@ -1,11 +1,12 @@
 'use strict';
 
-/* CLC Smart Choice v1.1.0 - App Layer */
-/* UI: Old-style card layout with tag filtering */
+/* CLC Smart Choice v1.3.0 - App Layer */
+/* UI: Old-style card layout with tag filtering + currency filter */
 /* Data: from __embeddedData__ in data.js */
+/* v1.3: Removed 小額入場, added currency filter, auto-derived tags */
 
-/* ========== Tag Rules (static, matches old version) ========== */
-/* Tags shown in old version order; "短期儲蓄" and "教育基金" have no products but are kept for UI consistency */
+/* ========== Tag Rules (v1.3.0) ========== */
+/* '小額入場' removed; '資產傳承' & '教育基金' now auto-derived */
 var TAG_RULES = {
   '整付入場': 'pay_term = 0（躉繳/整付）',
   '分期入場': 'pay_term ≥ 1 且 pay_term ≤ 10（分期繳費）',
@@ -13,11 +14,10 @@ var TAG_RULES = {
   '跨境財富規劃': '幣種包含USD、可離岸資產配置、終身分紅壽險',
   '槓桿融資': 'finance_support = 是，支持保費融資計劃',
   '短期儲蓄': 'break_year ≤ 10，回本速度快',
-  '資產傳承': 'life_type = 終身儲蓄，具備身故傳承價值',
+  '資產傳承': 'transfer_life_assured = 是（可轉換受保人）',
   '穩定收益': 'guarantee = 是，保證回報佔比高',
-  '退休規劃': '長期持有價值高、20年期IRR表現優、適合長線持有',
-  '教育基金': '中期回本、彈性提取現金價值、適合10–20年規劃',
-  '小額入場': 'min_prem ＜ 20000，低門檻投保'
+  '退休規劃': '長期持有價值高、適合長線持有',
+  '教育基金': '完成繳費後+10年保單價值 ≥ 已繳保費 × 180%'
 };
 
 /* ========== Data Loading ========== */
@@ -124,24 +124,38 @@ function groupProducts(products) {
       }
     }
 
-    // Break year: use first product's, handle missing
-    var breakYear = p0.breakYear;
-    if (breakYear === undefined || breakYear === null) {
-      // Check if any variant has a breakYear
-      for (var k = 0; k < prods.length; k++) {
-        if (prods[k].breakYear !== undefined && prods[k].breakYear !== null) {
-          breakYear = prods[k].breakYear;
-          break;
+    // Break year: collect per variant, display by payTerm
+    var breakYearMap = {};  // payTerm -> breakYear
+    var breakYearValues = [];
+    for (var k = 0; k < prods.length; k++) {
+      var by = prods[k].breakYear;
+      var pts2 = prods[k].payTerms || [];
+      for (var n2 = 0; n2 < pts2.length; n2++) {
+        var pt2 = pts2[n2];
+        if (by !== undefined && by !== null && !breakYearMap.hasOwnProperty(pt2)) {
+          breakYearMap[pt2] = by;
+          if (breakYearValues.indexOf(by) < 0) breakYearValues.push(by);
         }
       }
     }
 
-    // Format break year display
+    // Format break year display: show per payTerm if multiple values
     var breakYearDisplay;
-    if (breakYear === undefined || breakYear === null) {
+    if (breakYearValues.length === 0) {
       breakYearDisplay = '待補';
+    } else if (breakYearValues.length === 1) {
+      // All same, just show one number
+      breakYearDisplay = String(breakYearValues[0]) + '年';
     } else {
-      breakYearDisplay = String(breakYear);
+      // Multiple different break years, show per payTerm
+      var parts2 = [];
+      var sortedPts = Object.keys(breakYearMap).map(function(x) { return parseInt(x); }).sort(function(a, b) { return a - b; });
+      for (var s = 0; s < sortedPts.length; s++) {
+        var spt = sortedPts[s];
+        var label2 = spt === 0 ? '整付' : (spt + '年');
+        parts2.push(label2 + breakYearMap[spt] + '年');
+      }
+      breakYearDisplay = parts2.join('、');
     }
 
     // IRR 20: compute from policyData if available
@@ -180,12 +194,20 @@ function groupProducts(products) {
     var influencerPoint = p0.mainTag || '';
 
     // Scene description from category + highlights
-    var sceneDesc = buildSceneDesc(p0, currencies);
+    // Scene description
+    var sceneDesc = p0.scene_desc || buildSceneDesc(p0, currencies);
+
+    // Core points: collect from any variant (use first product's data)
+    var corePoints = [];
+    if (p0.core_point_1) corePoints.push(p0.core_point_1);
+    if (p0.core_point_2) corePoints.push(p0.core_point_2);
+    if (p0.core_point_3) corePoints.push(p0.core_point_3);
 
     result.push({
       name: gname,
       company: p0.company,
       code: p0.code || '',
+      displayCode: p0.displayCode || (p0.code || '').replace(/(USD|HKD|CNY).*/, ''),
       ids: prods.map(function(p) { return p.id; }),
       currencies: currencies,
       payTerms: payTerms,
@@ -199,6 +221,7 @@ function groupProducts(products) {
       featureShort: featureShort,
       influencerPoint: influencerPoint,
       sceneDesc: sceneDesc,
+      corePoints: corePoints,
       highlights: p0.highlights || [],
       category: p0.category || '',
       _products: prods
@@ -267,13 +290,23 @@ function formatNum(n) {
 }
 
 /* ========== Filter Products ========== */
-function filterProducts(selectedTags, groupedProducts) {
-  if (!selectedTags || selectedTags.length === 0) return groupedProducts;
-  return groupedProducts.filter(function(p) {
-    return selectedTags.every(function(t) {
-      return p.needTags.indexOf(t) >= 0;
+function filterProducts(selectedTags, groupedProducts, selectedCurrency) {
+  var result = groupedProducts;
+  // Filter by currency
+  if (selectedCurrency) {
+    result = result.filter(function(p) {
+      return p.currencies.indexOf(selectedCurrency) >= 0;
     });
-  });
+  }
+  // Filter by tags
+  if (selectedTags && selectedTags.length > 0) {
+    result = result.filter(function(p) {
+      return selectedTags.every(function(t) {
+        return p.needTags.indexOf(t) >= 0;
+      });
+    });
+  }
+  return result;
 }
 
 /* ========== Render Tags ========== */
@@ -313,11 +346,19 @@ function formatVal(v, suffix) {
   return '<span class="metric-value">' + v + (suffix || '') + '</span>';
 }
 
+/* ========== Get Selected Currency ========== */
+function getSelectedCurrency() {
+  var active = document.querySelector('.currency-btn.active');
+  if (active) return active.getAttribute('data-currency') || '';
+  return '';
+}
+
 /* ========== Render Products ========== */
 function renderProducts() {
   var selected = getSelectedTags();
+  var selectedCurrency = getSelectedCurrency();
   var grouped = groupProducts(window.__products || []);
-  var list = filterProducts(selected, grouped);
+  var list = filterProducts(selected, grouped, selectedCurrency);
 
   var container = document.getElementById('productContainer');
   var header = document.getElementById('resultHeader');
@@ -343,11 +384,23 @@ function renderProducts() {
       // Currency display
       var curStr = p.currencies.join('/');
 
+      // Core points list
+      var coreListHtml = '';
+      if (p.corePoints && p.corePoints.length > 0) {
+        coreListHtml = '<ul class="core-list">';
+        for (var k = 0; k < p.corePoints.length; k++) {
+          if (p.corePoints[k]) {
+            coreListHtml += '<li>' + p.corePoints[k] + '</li>';
+          }
+        }
+        coreListHtml += '</ul>';
+      }
+
       html += '<div class="product-card">' +
         '<div class="card-head">' +
           '<div>' +
             '<div class="prod-title">' + p.name + '</div>' +
-            '<div class="prod-meta">' + p.company + ' ｜ ' + p.code + ' ｜ ' + curStr + '</div>' +
+            '<div class="prod-meta">' + p.company + ' ｜ ' + p.displayCode + ' ｜ ' + curStr + '</div>' +
           '</div>' +
           '<div class="finance-tag ' + financeClass + '">保費融資</div>' +
         '</div>' +
@@ -355,12 +408,13 @@ function renderProducts() {
           '<div class="metric"><div class="metric-label">最低保費</div>' + formatVal(p.minPremium > 0 ? formatNum(p.minPremium) : '') + '</div>' +
           '<div class="metric"><div class="metric-label">繳費年期</div>' + formatVal(p.payTermLabels.join('、')) + '</div>' +
           '<div class="metric"><div class="metric-label">回本年</div>' + formatVal(p.breakYear) + '</div>' +
-          '<div class="metric"><div class="metric-label">IRR 20年</div>' + formatVal(p.irr20, '%') + '</div>' +
+          '<div class="metric"><div class="metric-label">幣種</div>' + formatVal(p.currencies.join('、')) + '</div>' +
         '</div>' +
         '<div class="tag-list">' + chips + '</div>' +
         '<div class="feature-text">' + p.featureShort + '</div>' +
         '<div class="influencer-block">' +
-          '<div class="point">★ ' + p.influencerPoint + '</div>' +
+          '<div class="point">★ 產品亮點</div>' +
+          coreListHtml +
           '<div class="scene">' + p.sceneDesc + '</div>' +
         '</div>' +
       '</div>';
@@ -392,6 +446,27 @@ function setupClearBtn() {
       for (var i = 0; i < inputs.length; i++) {
         inputs[i].checked = false;
       }
+      // Reset currency to "全部"
+      var curBtns = document.querySelectorAll('.currency-btn');
+      for (var j = 0; j < curBtns.length; j++) {
+        curBtns[j].classList.remove('active');
+      }
+      var allBtn = document.querySelector('.currency-btn[data-currency=""]');
+      if (allBtn) allBtn.classList.add('active');
+      renderProducts();
+    });
+  }
+}
+
+/* ========== Currency Filter ========== */
+function setupCurrencyFilter() {
+  var btns = document.querySelectorAll('.currency-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].addEventListener('click', function() {
+      for (var j = 0; j < btns.length; j++) {
+        btns[j].classList.remove('active');
+      }
+      this.classList.add('active');
       renderProducts();
     });
   }
@@ -414,6 +489,7 @@ function updateClock() {
 /* ========== Init ========== */
 function init() {
   setupClearBtn();
+  setupCurrencyFilter();
 
   // Clock
   updateClock();
