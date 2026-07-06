@@ -1,14 +1,14 @@
 'use strict';
 
-/* CLC Smart Choice v1.3.0 - Data Layer (Rebuilt) */
+/* CLC Smart Choice v1.4.0 - Data Layer (Rebuilt) */
 /* Source: products_v2.json + XLSX extracted policyData */
 /* 10 products (P001-P010) + INS03 pending */
 /* No irr_15/irr_20 fields (deleted per user instruction) */
-/* v1.3: Tag rules updated - removed 小額入場, 資產傳承=transfer, 教育基金=value_t+10>=180% */
+/* v1.4: Added ECharts chart system + discount fields - removed 小額入場, 資產傳承=transfer, 教育基金=value_t+10>=180% */
 /* Functions (applyData, loadProductsFromCache, etc.) are defined in app.js */
 
 const __embeddedData__ = {
-  "version": "CLC-SC-1.3.0",
+  "version": "CLC-SC-1.4.0",
   "lastUpdated": "2026-07-05",
   "config": {
     "currencySymbols": {
@@ -66,6 +66,9 @@ const __embeddedData__ = {
       "totalPremium": 8000,
       "breakYear": 4,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -850,6 +853,9 @@ const __embeddedData__ = {
       "totalPremium": 8000,
       "breakYear": 6,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -966,6 +972,9 @@ const __embeddedData__ = {
       "totalPremium": 40000,
       "breakYear": 7,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -1750,6 +1759,9 @@ const __embeddedData__ = {
       "totalPremium": 64000,
       "breakYear": 4,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -2482,6 +2494,9 @@ const __embeddedData__ = {
       "totalPremium": 64000,
       "breakYear": 7,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -3011,6 +3026,9 @@ const __embeddedData__ = {
       "totalPremium": 320000,
       "breakYear": 7,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -3743,6 +3761,9 @@ const __embeddedData__ = {
       "totalPremium": 51200,
       "breakYear": 5,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -4475,6 +4496,9 @@ const __embeddedData__ = {
       "totalPremium": 51200,
       "breakYear": 7,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -5207,6 +5231,9 @@ const __embeddedData__ = {
       "totalPremium": 8000,
       "breakYear": 4,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "短期儲蓄",
@@ -5215,312 +5242,319 @@ const __embeddedData__ = {
       ],
       "policyData": [
         {
+          "year": 1,
+          "premiumPaid": 8000,
+          "guaranteedCV": 6544,
+          "nonGuaranteedBonus": 0,
+          "totalSurrender": 6544
+        },
+        {
           "year": 2,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6560,
+          "guaranteedCV": 6560,
+          "nonGuaranteedBonus": 0,
           "totalSurrender": 6560
         },
         {
           "year": 3,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6568,
-          "totalSurrender": 733
+          "guaranteedCV": 6568,
+          "nonGuaranteedBonus": 733,
+          "totalSurrender": 7301
         },
         {
           "year": 4,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6576,
-          "totalSurrender": 1424
+          "guaranteedCV": 6576,
+          "nonGuaranteedBonus": 1424,
+          "totalSurrender": 8000
         },
         {
           "year": 5,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6584,
-          "totalSurrender": 1876
+          "guaranteedCV": 6584,
+          "nonGuaranteedBonus": 1876,
+          "totalSurrender": 8460
         },
         {
           "year": 6,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6592,
-          "totalSurrender": 2500
+          "guaranteedCV": 6592,
+          "nonGuaranteedBonus": 2500,
+          "totalSurrender": 9092
         },
         {
           "year": 7,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6600,
-          "totalSurrender": 3060
+          "guaranteedCV": 6600,
+          "nonGuaranteedBonus": 3060,
+          "totalSurrender": 9660
         },
         {
           "year": 8,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6608,
-          "totalSurrender": 4216
+          "guaranteedCV": 6608,
+          "nonGuaranteedBonus": 4216,
+          "totalSurrender": 10824
         },
         {
           "year": 9,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6616,
-          "totalSurrender": 4954
+          "guaranteedCV": 6616,
+          "nonGuaranteedBonus": 4954,
+          "totalSurrender": 11570
         },
         {
           "year": 10,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6664,
-          "totalSurrender": 5628
+          "guaranteedCV": 6664,
+          "nonGuaranteedBonus": 5628,
+          "totalSurrender": 12292
         },
         {
           "year": 11,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6920,
-          "totalSurrender": 6198
+          "guaranteedCV": 6920,
+          "nonGuaranteedBonus": 6198,
+          "totalSurrender": 13118
         },
         {
           "year": 12,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 7240,
-          "totalSurrender": 6631
+          "guaranteedCV": 7240,
+          "nonGuaranteedBonus": 6631,
+          "totalSurrender": 13871
         },
         {
           "year": 13,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 7480,
-          "totalSurrender": 7279
+          "guaranteedCV": 7480,
+          "nonGuaranteedBonus": 7279,
+          "totalSurrender": 14759
         },
         {
           "year": 14,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 7640,
-          "totalSurrender": 8095
+          "guaranteedCV": 7640,
+          "nonGuaranteedBonus": 8095,
+          "totalSurrender": 15735
         },
         {
           "year": 15,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 7800,
-          "totalSurrender": 9128
+          "guaranteedCV": 7800,
+          "nonGuaranteedBonus": 9128,
+          "totalSurrender": 16928
         },
         {
           "year": 16,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 7880,
-          "totalSurrender": 10096
+          "guaranteedCV": 7880,
+          "nonGuaranteedBonus": 10096,
+          "totalSurrender": 17976
         },
         {
           "year": 17,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 7960,
-          "totalSurrender": 11151
+          "guaranteedCV": 7960,
+          "nonGuaranteedBonus": 11151,
+          "totalSurrender": 19111
         },
         {
           "year": 18,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8000,
-          "totalSurrender": 12339
+          "guaranteedCV": 8000,
+          "nonGuaranteedBonus": 12339,
+          "totalSurrender": 20339
         },
         {
           "year": 19,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8016,
-          "totalSurrender": 13640
+          "guaranteedCV": 8016,
+          "nonGuaranteedBonus": 13640,
+          "totalSurrender": 21656
         },
         {
           "year": 20,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8032,
-          "totalSurrender": 15096
+          "guaranteedCV": 8032,
+          "nonGuaranteedBonus": 15096,
+          "totalSurrender": 23128
         },
         {
           "year": 21,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8064,
-          "totalSurrender": 16464
+          "guaranteedCV": 8064,
+          "nonGuaranteedBonus": 16464,
+          "totalSurrender": 24528
         },
         {
           "year": 22,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8101,
-          "totalSurrender": 17934
+          "guaranteedCV": 8101,
+          "nonGuaranteedBonus": 17934,
+          "totalSurrender": 26035
         },
         {
           "year": 23,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8115,
-          "totalSurrender": 19498
+          "guaranteedCV": 8115,
+          "nonGuaranteedBonus": 19498,
+          "totalSurrender": 27613
         },
         {
           "year": 24,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8130,
-          "totalSurrender": 21251
+          "guaranteedCV": 8130,
+          "nonGuaranteedBonus": 21251,
+          "totalSurrender": 29381
         },
         {
           "year": 25,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8144,
-          "totalSurrender": 23094
+          "guaranteedCV": 8144,
+          "nonGuaranteedBonus": 23094,
+          "totalSurrender": 31238
         },
         {
           "year": 26,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8158,
-          "totalSurrender": 25107
+          "guaranteedCV": 8158,
+          "nonGuaranteedBonus": 25107,
+          "totalSurrender": 33265
         },
         {
           "year": 27,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8173,
-          "totalSurrender": 27291
+          "guaranteedCV": 8173,
+          "nonGuaranteedBonus": 27291,
+          "totalSurrender": 35464
         },
         {
           "year": 28,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8187,
-          "totalSurrender": 29586
+          "guaranteedCV": 8187,
+          "nonGuaranteedBonus": 29586,
+          "totalSurrender": 37774
         },
         {
           "year": 29,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8202,
-          "totalSurrender": 32077
+          "guaranteedCV": 8202,
+          "nonGuaranteedBonus": 32077,
+          "totalSurrender": 40279
         },
         {
           "year": 30,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8216,
-          "totalSurrender": 34955
+          "guaranteedCV": 8216,
+          "nonGuaranteedBonus": 34955,
+          "totalSurrender": 43171
         },
         {
           "year": 31,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8230,
-          "totalSurrender": 37705
+          "guaranteedCV": 8230,
+          "nonGuaranteedBonus": 37705,
+          "totalSurrender": 45935
         },
         {
           "year": 32,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8245,
-          "totalSurrender": 40798
+          "guaranteedCV": 8245,
+          "nonGuaranteedBonus": 40798,
+          "totalSurrender": 49042
         },
         {
           "year": 33,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8259,
-          "totalSurrender": 44212
+          "guaranteedCV": 8259,
+          "nonGuaranteedBonus": 44212,
+          "totalSurrender": 52471
         },
         {
           "year": 34,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8274,
-          "totalSurrender": 47813
+          "guaranteedCV": 8274,
+          "nonGuaranteedBonus": 47813,
+          "totalSurrender": 56086
         },
         {
           "year": 35,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8288,
-          "totalSurrender": 51795
+          "guaranteedCV": 8288,
+          "nonGuaranteedBonus": 51795,
+          "totalSurrender": 60083
         },
         {
           "year": 36,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8302,
-          "totalSurrender": 55996
+          "guaranteedCV": 8302,
+          "nonGuaranteedBonus": 55996,
+          "totalSurrender": 64298
         },
         {
           "year": 37,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8317,
-          "totalSurrender": 60531
+          "guaranteedCV": 8317,
+          "nonGuaranteedBonus": 60531,
+          "totalSurrender": 68848
         },
         {
           "year": 38,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8331,
-          "totalSurrender": 65271
+          "guaranteedCV": 8331,
+          "nonGuaranteedBonus": 65271,
+          "totalSurrender": 73602
         },
         {
           "year": 39,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8346,
-          "totalSurrender": 70462
+          "guaranteedCV": 8346,
+          "nonGuaranteedBonus": 70462,
+          "totalSurrender": 78808
         },
         {
           "year": 40,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8360,
-          "totalSurrender": 76352
+          "guaranteedCV": 8360,
+          "nonGuaranteedBonus": 76352,
+          "totalSurrender": 84712
         },
         {
           "year": 41,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8374,
-          "totalSurrender": 81712
+          "guaranteedCV": 8374,
+          "nonGuaranteedBonus": 81712,
+          "totalSurrender": 90086
         },
         {
           "year": 42,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8389,
-          "totalSurrender": 87424
+          "guaranteedCV": 8389,
+          "nonGuaranteedBonus": 87424,
+          "totalSurrender": 95813
         },
         {
           "year": 43,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8403,
-          "totalSurrender": 93513
+          "guaranteedCV": 8403,
+          "nonGuaranteedBonus": 93513,
+          "totalSurrender": 101916
         },
         {
           "year": 44,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8418,
-          "totalSurrender": 100003
+          "guaranteedCV": 8418,
+          "nonGuaranteedBonus": 100003,
+          "totalSurrender": 108421
         },
         {
           "year": 45,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8432,
-          "totalSurrender": 106923
+          "guaranteedCV": 8432,
+          "nonGuaranteedBonus": 106923,
+          "totalSurrender": 115355
         }
       ],
       "unitData": [
@@ -5611,6 +5645,9 @@ const __embeddedData__ = {
       "totalPremium": 64000,
       "breakYear": 4,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "短期儲蓄",
@@ -5619,312 +5656,319 @@ const __embeddedData__ = {
       ],
       "policyData": [
         {
+          "year": 1,
+          "premiumPaid": 64000,
+          "guaranteedCV": 49408,
+          "nonGuaranteedBonus": 0,
+          "totalSurrender": 49408
+        },
+        {
           "year": 2,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 49421,
+          "guaranteedCV": 49421,
+          "nonGuaranteedBonus": 0,
           "totalSurrender": 49421
         },
         {
           "year": 3,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 49434,
-          "totalSurrender": 5440
+          "guaranteedCV": 49434,
+          "nonGuaranteedBonus": 5440,
+          "totalSurrender": 54874
         },
         {
           "year": 4,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 49446,
-          "totalSurrender": 11200
+          "guaranteedCV": 49446,
+          "nonGuaranteedBonus": 11200,
+          "totalSurrender": 60646
         },
         {
           "year": 5,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 49459,
-          "totalSurrender": 14720
+          "guaranteedCV": 49459,
+          "nonGuaranteedBonus": 14720,
+          "totalSurrender": 64179
         },
         {
           "year": 6,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 49472,
-          "totalSurrender": 19840
+          "guaranteedCV": 49472,
+          "nonGuaranteedBonus": 19840,
+          "totalSurrender": 69312
         },
         {
           "year": 7,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 49485,
-          "totalSurrender": 24320
+          "guaranteedCV": 49485,
+          "nonGuaranteedBonus": 24320,
+          "totalSurrender": 73805
         },
         {
           "year": 8,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 49498,
-          "totalSurrender": 33215
+          "guaranteedCV": 49498,
+          "nonGuaranteedBonus": 33215,
+          "totalSurrender": 82712
         },
         {
           "year": 9,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 49510,
-          "totalSurrender": 38333
+          "guaranteedCV": 49510,
+          "nonGuaranteedBonus": 38333,
+          "totalSurrender": 87843
         },
         {
           "year": 10,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 49600,
-          "totalSurrender": 44826
+          "guaranteedCV": 49600,
+          "nonGuaranteedBonus": 44826,
+          "totalSurrender": 94426
         },
         {
           "year": 11,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 54042,
-          "totalSurrender": 46306
+          "guaranteedCV": 54042,
+          "nonGuaranteedBonus": 46306,
+          "totalSurrender": 100348
         },
         {
           "year": 12,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 57459,
-          "totalSurrender": 48826
+          "guaranteedCV": 57459,
+          "nonGuaranteedBonus": 48826,
+          "totalSurrender": 106285
         },
         {
           "year": 13,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 59341,
-          "totalSurrender": 53446
+          "guaranteedCV": 59341,
+          "nonGuaranteedBonus": 53446,
+          "totalSurrender": 112787
         },
         {
           "year": 14,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 60582,
-          "totalSurrender": 59331
+          "guaranteedCV": 60582,
+          "nonGuaranteedBonus": 59331,
+          "totalSurrender": 119913
         },
         {
           "year": 15,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 61824,
-          "totalSurrender": 65907
+          "guaranteedCV": 61824,
+          "nonGuaranteedBonus": 65907,
+          "totalSurrender": 127731
         },
         {
           "year": 16,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 62426,
-          "totalSurrender": 73058
+          "guaranteedCV": 62426,
+          "nonGuaranteedBonus": 73058,
+          "totalSurrender": 135484
         },
         {
           "year": 17,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 63027,
-          "totalSurrender": 80248
+          "guaranteedCV": 63027,
+          "nonGuaranteedBonus": 80248,
+          "totalSurrender": 143275
         },
         {
           "year": 18,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 63309,
-          "totalSurrender": 88552
+          "guaranteedCV": 63309,
+          "nonGuaranteedBonus": 88552,
+          "totalSurrender": 151860
         },
         {
           "year": 19,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 63398,
-          "totalSurrender": 97452
+          "guaranteedCV": 63398,
+          "nonGuaranteedBonus": 97452,
+          "totalSurrender": 160850
         },
         {
           "year": 20,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 63488,
-          "totalSurrender": 107279
+          "guaranteedCV": 63488,
+          "nonGuaranteedBonus": 107279,
+          "totalSurrender": 170767
         },
         {
           "year": 21,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 63706,
-          "totalSurrender": 120150
+          "guaranteedCV": 63706,
+          "nonGuaranteedBonus": 120150,
+          "totalSurrender": 183855
         },
         {
           "year": 22,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64102,
-          "totalSurrender": 131981
+          "guaranteedCV": 64102,
+          "nonGuaranteedBonus": 131981,
+          "totalSurrender": 196083
         },
         {
           "year": 23,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64186,
-          "totalSurrender": 142939
+          "guaranteedCV": 64186,
+          "nonGuaranteedBonus": 142939,
+          "totalSurrender": 207124
         },
         {
           "year": 24,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64269,
-          "totalSurrender": 154788
+          "guaranteedCV": 64269,
+          "nonGuaranteedBonus": 154788,
+          "totalSurrender": 219057
         },
         {
           "year": 25,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64352,
-          "totalSurrender": 169228
+          "guaranteedCV": 64352,
+          "nonGuaranteedBonus": 169228,
+          "totalSurrender": 233580
         },
         {
           "year": 26,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64435,
-          "totalSurrender": 178724
+          "guaranteedCV": 64435,
+          "nonGuaranteedBonus": 178724,
+          "totalSurrender": 243159
         },
         {
           "year": 27,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64518,
-          "totalSurrender": 193982
+          "guaranteedCV": 64518,
+          "nonGuaranteedBonus": 193982,
+          "totalSurrender": 258500
         },
         {
           "year": 28,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64602,
-          "totalSurrender": 209996
+          "guaranteedCV": 64602,
+          "nonGuaranteedBonus": 209996,
+          "totalSurrender": 274597
         },
         {
           "year": 29,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64685,
-          "totalSurrender": 227375
+          "guaranteedCV": 64685,
+          "nonGuaranteedBonus": 227375,
+          "totalSurrender": 292060
         },
         {
           "year": 30,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64768,
-          "totalSurrender": 247491
+          "guaranteedCV": 64768,
+          "nonGuaranteedBonus": 247491,
+          "totalSurrender": 312259
         },
         {
           "year": 31,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65050,
-          "totalSurrender": 266338
+          "guaranteedCV": 65050,
+          "nonGuaranteedBonus": 266338,
+          "totalSurrender": 331388
         },
         {
           "year": 32,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65139,
-          "totalSurrender": 287807
+          "guaranteedCV": 65139,
+          "nonGuaranteedBonus": 287807,
+          "totalSurrender": 352946
         },
         {
           "year": 33,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65229,
-          "totalSurrender": 311533
+          "guaranteedCV": 65229,
+          "nonGuaranteedBonus": 311533,
+          "totalSurrender": 376762
         },
         {
           "year": 34,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65318,
-          "totalSurrender": 336543
+          "guaranteedCV": 65318,
+          "nonGuaranteedBonus": 336543,
+          "totalSurrender": 401861
         },
         {
           "year": 35,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65408,
-          "totalSurrender": 364236
+          "guaranteedCV": 65408,
+          "nonGuaranteedBonus": 364236,
+          "totalSurrender": 429644
         },
         {
           "year": 36,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65498,
-          "totalSurrender": 393428
+          "guaranteedCV": 65498,
+          "nonGuaranteedBonus": 393428,
+          "totalSurrender": 458926
         },
         {
           "year": 37,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65587,
-          "totalSurrender": 424955
+          "guaranteedCV": 65587,
+          "nonGuaranteedBonus": 424955,
+          "totalSurrender": 490542
         },
         {
           "year": 38,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65677,
-          "totalSurrender": 457886
+          "guaranteedCV": 65677,
+          "nonGuaranteedBonus": 457886,
+          "totalSurrender": 523563
         },
         {
           "year": 39,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65766,
-          "totalSurrender": 493974
+          "guaranteedCV": 65766,
+          "nonGuaranteedBonus": 493974,
+          "totalSurrender": 559740
         },
         {
           "year": 40,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65856,
-          "totalSurrender": 534977
+          "guaranteedCV": 65856,
+          "nonGuaranteedBonus": 534977,
+          "totalSurrender": 600833
         },
         {
           "year": 41,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65946,
-          "totalSurrender": 572122
+          "guaranteedCV": 65946,
+          "nonGuaranteedBonus": 572122,
+          "totalSurrender": 638067
         },
         {
           "year": 42,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 66035,
-          "totalSurrender": 611817
+          "guaranteedCV": 66035,
+          "nonGuaranteedBonus": 611817,
+          "totalSurrender": 677852
         },
         {
           "year": 43,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 66125,
-          "totalSurrender": 654134
+          "guaranteedCV": 66125,
+          "nonGuaranteedBonus": 654134,
+          "totalSurrender": 720259
         },
         {
           "year": 44,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 66214,
-          "totalSurrender": 699343
+          "guaranteedCV": 66214,
+          "nonGuaranteedBonus": 699343,
+          "totalSurrender": 765558
         },
         {
           "year": 45,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 66304,
-          "totalSurrender": 747551
+          "guaranteedCV": 66304,
+          "nonGuaranteedBonus": 747551,
+          "totalSurrender": 813855
         }
       ],
       "ins_id": "INS01",
@@ -5963,6 +6007,9 @@ const __embeddedData__ = {
       "totalPremium": 1000000,
       "breakYear": 5,
       "isFinanceable": true,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "高淨值資產配置",
@@ -6177,6 +6224,9 @@ const __embeddedData__ = {
       "totalPremium": 40000,
       "breakYear": 5,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "短期儲蓄",
@@ -6185,6 +6235,13 @@ const __embeddedData__ = {
         "教育基金"
       ],
       "policyData": [
+        {
+          "year": 1,
+          "premiumPaid": 1600,
+          "guaranteedCV": 0,
+          "nonGuaranteedBonus": 0,
+          "totalSurrender": 0
+        },
         {
           "year": 2,
           "premiumPaid": 3200,
@@ -6195,303 +6252,303 @@ const __embeddedData__ = {
         {
           "year": 3,
           "premiumPaid": 4800,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 119,
+          "guaranteedCV": 119,
+          "nonGuaranteedBonus": 0,
           "totalSurrender": 119
         },
         {
           "year": 4,
           "premiumPaid": 6400,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 231,
+          "guaranteedCV": 231,
+          "nonGuaranteedBonus": 0,
           "totalSurrender": 231
         },
         {
           "year": 5,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 837,
-          "totalSurrender": 2269
+          "guaranteedCV": 837,
+          "nonGuaranteedBonus": 2269,
+          "totalSurrender": 3106
         },
         {
           "year": 6,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 1515,
-          "totalSurrender": 2772
+          "guaranteedCV": 1515,
+          "nonGuaranteedBonus": 2772,
+          "totalSurrender": 4287
         },
         {
           "year": 7,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 2880,
-          "totalSurrender": 5124
+          "guaranteedCV": 2880,
+          "nonGuaranteedBonus": 5124,
+          "totalSurrender": 8004
         },
         {
           "year": 8,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 3092,
-          "totalSurrender": 5127
+          "guaranteedCV": 3092,
+          "nonGuaranteedBonus": 5127,
+          "totalSurrender": 8219
         },
         {
           "year": 9,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 3280,
-          "totalSurrender": 5460
+          "guaranteedCV": 3280,
+          "nonGuaranteedBonus": 5460,
+          "totalSurrender": 8740
         },
         {
           "year": 10,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 4000,
-          "totalSurrender": 5985
+          "guaranteedCV": 4000,
+          "nonGuaranteedBonus": 5985,
+          "totalSurrender": 9985
         },
         {
           "year": 11,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 4280,
-          "totalSurrender": 5994
+          "guaranteedCV": 4280,
+          "nonGuaranteedBonus": 5994,
+          "totalSurrender": 10274
         },
         {
           "year": 12,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 4864,
-          "totalSurrender": 6002
+          "guaranteedCV": 4864,
+          "nonGuaranteedBonus": 6002,
+          "totalSurrender": 10866
         },
         {
           "year": 13,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 5744,
-          "totalSurrender": 6139
+          "guaranteedCV": 5744,
+          "nonGuaranteedBonus": 6139,
+          "totalSurrender": 11883
         },
         {
           "year": 14,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6640,
-          "totalSurrender": 6263
+          "guaranteedCV": 6640,
+          "nonGuaranteedBonus": 6263,
+          "totalSurrender": 12903
         },
         {
           "year": 15,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6800,
-          "totalSurrender": 7675
+          "guaranteedCV": 6800,
+          "nonGuaranteedBonus": 7675,
+          "totalSurrender": 14475
         },
         {
           "year": 16,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 7200,
-          "totalSurrender": 7988
+          "guaranteedCV": 7200,
+          "nonGuaranteedBonus": 7988,
+          "totalSurrender": 15188
         },
         {
           "year": 17,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 7560,
-          "totalSurrender": 8522
+          "guaranteedCV": 7560,
+          "nonGuaranteedBonus": 8522,
+          "totalSurrender": 16082
         },
         {
           "year": 18,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8004,
-          "totalSurrender": 9771
+          "guaranteedCV": 8004,
+          "nonGuaranteedBonus": 9771,
+          "totalSurrender": 17775
         },
         {
           "year": 19,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8008,
-          "totalSurrender": 11448
+          "guaranteedCV": 8008,
+          "nonGuaranteedBonus": 11448,
+          "totalSurrender": 19456
         },
         {
           "year": 20,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8016,
-          "totalSurrender": 13453
+          "guaranteedCV": 8016,
+          "nonGuaranteedBonus": 13453,
+          "totalSurrender": 21469
         },
         {
           "year": 21,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8027,
-          "totalSurrender": 14772
+          "guaranteedCV": 8027,
+          "nonGuaranteedBonus": 14772,
+          "totalSurrender": 22799
         },
         {
           "year": 22,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8042,
-          "totalSurrender": 16276
+          "guaranteedCV": 8042,
+          "nonGuaranteedBonus": 16276,
+          "totalSurrender": 24318
         },
         {
           "year": 23,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8058,
-          "totalSurrender": 17904
+          "guaranteedCV": 8058,
+          "nonGuaranteedBonus": 17904,
+          "totalSurrender": 25962
         },
         {
           "year": 24,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8075,
-          "totalSurrender": 19960
+          "guaranteedCV": 8075,
+          "nonGuaranteedBonus": 19960,
+          "totalSurrender": 28034
         },
         {
           "year": 25,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8093,
-          "totalSurrender": 22737
+          "guaranteedCV": 8093,
+          "nonGuaranteedBonus": 22737,
+          "totalSurrender": 30829
         },
         {
           "year": 26,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8112,
-          "totalSurrender": 24612
+          "guaranteedCV": 8112,
+          "nonGuaranteedBonus": 24612,
+          "totalSurrender": 32724
         },
         {
           "year": 27,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8132,
-          "totalSurrender": 26730
+          "guaranteedCV": 8132,
+          "nonGuaranteedBonus": 26730,
+          "totalSurrender": 34862
         },
         {
           "year": 28,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8153,
-          "totalSurrender": 29001
+          "guaranteedCV": 8153,
+          "nonGuaranteedBonus": 29001,
+          "totalSurrender": 37154
         },
         {
           "year": 29,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8175,
-          "totalSurrender": 31741
+          "guaranteedCV": 8175,
+          "nonGuaranteedBonus": 31741,
+          "totalSurrender": 39916
         },
         {
           "year": 30,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8198,
-          "totalSurrender": 34839
+          "guaranteedCV": 8198,
+          "nonGuaranteedBonus": 34839,
+          "totalSurrender": 43038
         },
         {
           "year": 31,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8206,
-          "totalSurrender": 37616
+          "guaranteedCV": 8206,
+          "nonGuaranteedBonus": 37616,
+          "totalSurrender": 45823
         },
         {
           "year": 32,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8232,
-          "totalSurrender": 40566
+          "guaranteedCV": 8232,
+          "nonGuaranteedBonus": 40566,
+          "totalSurrender": 48797
         },
         {
           "year": 33,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8258,
-          "totalSurrender": 43869
+          "guaranteedCV": 8258,
+          "nonGuaranteedBonus": 43869,
+          "totalSurrender": 52127
         },
         {
           "year": 34,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8286,
-          "totalSurrender": 47420
+          "guaranteedCV": 8286,
+          "nonGuaranteedBonus": 47420,
+          "totalSurrender": 55706
         },
         {
           "year": 35,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8315,
-          "totalSurrender": 51609
+          "guaranteedCV": 8315,
+          "nonGuaranteedBonus": 51609,
+          "totalSurrender": 59924
         },
         {
           "year": 36,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8345,
-          "totalSurrender": 55753
+          "guaranteedCV": 8345,
+          "nonGuaranteedBonus": 55753,
+          "totalSurrender": 64097
         },
         {
           "year": 37,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8376,
-          "totalSurrender": 60212
+          "guaranteedCV": 8376,
+          "nonGuaranteedBonus": 60212,
+          "totalSurrender": 68587
         },
         {
           "year": 38,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8408,
-          "totalSurrender": 65261
+          "guaranteedCV": 8408,
+          "nonGuaranteedBonus": 65261,
+          "totalSurrender": 73669
         },
         {
           "year": 39,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8442,
-          "totalSurrender": 70730
+          "guaranteedCV": 8442,
+          "nonGuaranteedBonus": 70730,
+          "totalSurrender": 79172
         },
         {
           "year": 40,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8476,
-          "totalSurrender": 77638
+          "guaranteedCV": 8476,
+          "nonGuaranteedBonus": 77638,
+          "totalSurrender": 86114
         },
         {
           "year": 41,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8512,
-          "totalSurrender": 83251
+          "guaranteedCV": 8512,
+          "nonGuaranteedBonus": 83251,
+          "totalSurrender": 91763
         },
         {
           "year": 42,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8523,
-          "totalSurrender": 89338
+          "guaranteedCV": 8523,
+          "nonGuaranteedBonus": 89338,
+          "totalSurrender": 97862
         },
         {
           "year": 43,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8561,
-          "totalSurrender": 96015
+          "guaranteedCV": 8561,
+          "nonGuaranteedBonus": 96015,
+          "totalSurrender": 104577
         },
         {
           "year": 44,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8601,
-          "totalSurrender": 103173
+          "guaranteedCV": 8601,
+          "nonGuaranteedBonus": 103173,
+          "totalSurrender": 111774
         },
         {
           "year": 45,
           "premiumPaid": 8000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 8641,
-          "totalSurrender": 111819
+          "guaranteedCV": 8641,
+          "nonGuaranteedBonus": 111819,
+          "totalSurrender": 120460
         }
       ],
       "unitData": [
@@ -6682,6 +6739,9 @@ const __embeddedData__ = {
       "totalPremium": 320000,
       "breakYear": 5,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "短期儲蓄",
@@ -6690,6 +6750,13 @@ const __embeddedData__ = {
         "教育基金"
       ],
       "policyData": [
+        {
+          "year": 1,
+          "premiumPaid": 12800,
+          "guaranteedCV": 0,
+          "nonGuaranteedBonus": 0,
+          "totalSurrender": 0
+        },
         {
           "year": 2,
           "premiumPaid": 25600,
@@ -6700,303 +6767,303 @@ const __embeddedData__ = {
         {
           "year": 3,
           "premiumPaid": 38400,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 948,
+          "guaranteedCV": 948,
+          "nonGuaranteedBonus": 0,
           "totalSurrender": 948
         },
         {
           "year": 4,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 3126,
+          "guaranteedCV": 3126,
+          "nonGuaranteedBonus": 0,
           "totalSurrender": 3126
         },
         {
           "year": 5,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 6694,
-          "totalSurrender": 18152
+          "guaranteedCV": 6694,
+          "nonGuaranteedBonus": 18152,
+          "totalSurrender": 24847
         },
         {
           "year": 6,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 12122,
-          "totalSurrender": 22175
+          "guaranteedCV": 12122,
+          "nonGuaranteedBonus": 22175,
+          "totalSurrender": 34298
         },
         {
           "year": 7,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 23040,
-          "totalSurrender": 40992
+          "guaranteedCV": 23040,
+          "nonGuaranteedBonus": 40992,
+          "totalSurrender": 64032
         },
         {
           "year": 8,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 23360,
-          "totalSurrender": 42389
+          "guaranteedCV": 23360,
+          "nonGuaranteedBonus": 42389,
+          "totalSurrender": 65749
         },
         {
           "year": 9,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 26240,
-          "totalSurrender": 43682
+          "guaranteedCV": 26240,
+          "nonGuaranteedBonus": 43682,
+          "totalSurrender": 69922
         },
         {
           "year": 10,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 31040,
-          "totalSurrender": 48095
+          "guaranteedCV": 31040,
+          "nonGuaranteedBonus": 48095,
+          "totalSurrender": 79135
         },
         {
           "year": 11,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 32320,
-          "totalSurrender": 49224
+          "guaranteedCV": 32320,
+          "nonGuaranteedBonus": 49224,
+          "totalSurrender": 81544
         },
         {
           "year": 12,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 35584,
-          "totalSurrender": 50334
+          "guaranteedCV": 35584,
+          "nonGuaranteedBonus": 50334,
+          "totalSurrender": 85918
         },
         {
           "year": 13,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 43776,
-          "totalSurrender": 50374
+          "guaranteedCV": 43776,
+          "nonGuaranteedBonus": 50374,
+          "totalSurrender": 94150
         },
         {
           "year": 14,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 51200,
-          "totalSurrender": 50829
+          "guaranteedCV": 51200,
+          "nonGuaranteedBonus": 50829,
+          "totalSurrender": 102029
         },
         {
           "year": 15,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 59200,
-          "totalSurrender": 55585
+          "guaranteedCV": 59200,
+          "nonGuaranteedBonus": 55585,
+          "totalSurrender": 114785
         },
         {
           "year": 16,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 63040,
-          "totalSurrender": 57325
+          "guaranteedCV": 63040,
+          "nonGuaranteedBonus": 57325,
+          "totalSurrender": 120365
         },
         {
           "year": 17,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 63360,
-          "totalSurrender": 64003
+          "guaranteedCV": 63360,
+          "nonGuaranteedBonus": 64003,
+          "totalSurrender": 127363
         },
         {
           "year": 18,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 63680,
-          "totalSurrender": 76787
+          "guaranteedCV": 63680,
+          "nonGuaranteedBonus": 76787,
+          "totalSurrender": 140467
         },
         {
           "year": 19,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 63872,
-          "totalSurrender": 90017
+          "guaranteedCV": 63872,
+          "nonGuaranteedBonus": 90017,
+          "totalSurrender": 153889
         },
         {
           "year": 20,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64000,
-          "totalSurrender": 101107
+          "guaranteedCV": 64000,
+          "nonGuaranteedBonus": 101107,
+          "totalSurrender": 165107
         },
         {
           "year": 21,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64064,
-          "totalSurrender": 113767
+          "guaranteedCV": 64064,
+          "nonGuaranteedBonus": 113767,
+          "totalSurrender": 177831
         },
         {
           "year": 22,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64143,
-          "totalSurrender": 125282
+          "guaranteedCV": 64143,
+          "nonGuaranteedBonus": 125282,
+          "totalSurrender": 189425
         },
         {
           "year": 23,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64246,
-          "totalSurrender": 137720
+          "guaranteedCV": 64246,
+          "nonGuaranteedBonus": 137720,
+          "totalSurrender": 201966
         },
         {
           "year": 24,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64356,
-          "totalSurrender": 153451
+          "guaranteedCV": 64356,
+          "nonGuaranteedBonus": 153451,
+          "totalSurrender": 217807
         },
         {
           "year": 25,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64472,
-          "totalSurrender": 170346
+          "guaranteedCV": 64472,
+          "nonGuaranteedBonus": 170346,
+          "totalSurrender": 234817
         },
         {
           "year": 26,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64595,
-          "totalSurrender": 187261
+          "guaranteedCV": 64595,
+          "nonGuaranteedBonus": 187261,
+          "totalSurrender": 251856
         },
         {
           "year": 27,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64725,
-          "totalSurrender": 203158
+          "guaranteedCV": 64725,
+          "nonGuaranteedBonus": 203158,
+          "totalSurrender": 267883
         },
         {
           "year": 28,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 64863,
-          "totalSurrender": 222291
+          "guaranteedCV": 64863,
+          "nonGuaranteedBonus": 222291,
+          "totalSurrender": 287153
         },
         {
           "year": 29,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65007,
-          "totalSurrender": 240735
+          "guaranteedCV": 65007,
+          "nonGuaranteedBonus": 240735,
+          "totalSurrender": 305742
         },
         {
           "year": 30,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65158,
-          "totalSurrender": 259637
+          "guaranteedCV": 65158,
+          "nonGuaranteedBonus": 259637,
+          "totalSurrender": 324795
         },
         {
           "year": 31,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65184,
-          "totalSurrender": 282771
+          "guaranteedCV": 65184,
+          "nonGuaranteedBonus": 282771,
+          "totalSurrender": 347955
         },
         {
           "year": 32,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65350,
-          "totalSurrender": 303483
+          "guaranteedCV": 65350,
+          "nonGuaranteedBonus": 303483,
+          "totalSurrender": 368833
         },
         {
           "year": 33,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65522,
-          "totalSurrender": 325441
+          "guaranteedCV": 65522,
+          "nonGuaranteedBonus": 325441,
+          "totalSurrender": 390963
         },
         {
           "year": 34,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65701,
-          "totalSurrender": 348719
+          "guaranteedCV": 65701,
+          "nonGuaranteedBonus": 348719,
+          "totalSurrender": 414420
         },
         {
           "year": 35,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 65888,
-          "totalSurrender": 373398
+          "guaranteedCV": 65888,
+          "nonGuaranteedBonus": 373398,
+          "totalSurrender": 439286
         },
         {
           "year": 36,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 66082,
-          "totalSurrender": 399561
+          "guaranteedCV": 66082,
+          "nonGuaranteedBonus": 399561,
+          "totalSurrender": 465643
         },
         {
           "year": 37,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 66283,
-          "totalSurrender": 427299
+          "guaranteedCV": 66283,
+          "nonGuaranteedBonus": 427299,
+          "totalSurrender": 493581
         },
         {
           "year": 38,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 66492,
-          "totalSurrender": 456704
+          "guaranteedCV": 66492,
+          "nonGuaranteedBonus": 456704,
+          "totalSurrender": 523196
         },
         {
           "year": 39,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 66709,
-          "totalSurrender": 487879
+          "guaranteedCV": 66709,
+          "nonGuaranteedBonus": 487879,
+          "totalSurrender": 554588
         },
         {
           "year": 40,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 66934,
-          "totalSurrender": 520929
+          "guaranteedCV": 66934,
+          "nonGuaranteedBonus": 520929,
+          "totalSurrender": 587863
         },
         {
           "year": 41,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 67712,
-          "totalSurrender": 555423
+          "guaranteedCV": 67712,
+          "nonGuaranteedBonus": 555423,
+          "totalSurrender": 623135
         },
         {
           "year": 42,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 67950,
-          "totalSurrender": 592573
+          "guaranteedCV": 67950,
+          "nonGuaranteedBonus": 592573,
+          "totalSurrender": 660523
         },
         {
           "year": 43,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 68196,
-          "totalSurrender": 631958
+          "guaranteedCV": 68196,
+          "nonGuaranteedBonus": 631958,
+          "totalSurrender": 700154
         },
         {
           "year": 44,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 68451,
-          "totalSurrender": 673713
+          "guaranteedCV": 68451,
+          "nonGuaranteedBonus": 673713,
+          "totalSurrender": 742164
         },
         {
           "year": 45,
           "premiumPaid": 64000,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 68712,
-          "totalSurrender": 717982
+          "guaranteedCV": 68712,
+          "nonGuaranteedBonus": 717982,
+          "totalSurrender": 786694
         }
       ],
       "unitData": [
@@ -7187,6 +7254,9 @@ const __embeddedData__ = {
       "totalPremium": 256000,
       "breakYear": 5,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "短期儲蓄",
@@ -7195,6 +7265,13 @@ const __embeddedData__ = {
         "教育基金"
       ],
       "policyData": [
+        {
+          "year": 1,
+          "premiumPaid": 10240,
+          "guaranteedCV": 0,
+          "nonGuaranteedBonus": 0,
+          "totalSurrender": 0
+        },
         {
           "year": 2,
           "premiumPaid": 20480,
@@ -7205,303 +7282,303 @@ const __embeddedData__ = {
         {
           "year": 3,
           "premiumPaid": 30720,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 759,
+          "guaranteedCV": 759,
+          "nonGuaranteedBonus": 0,
           "totalSurrender": 759
         },
         {
           "year": 4,
           "premiumPaid": 40960,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 2501,
+          "guaranteedCV": 2501,
+          "nonGuaranteedBonus": 0,
           "totalSurrender": 2501
         },
         {
           "year": 5,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 5356,
-          "totalSurrender": 14522
+          "guaranteedCV": 5356,
+          "nonGuaranteedBonus": 14522,
+          "totalSurrender": 19877
         },
         {
           "year": 6,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 9698,
-          "totalSurrender": 17740
+          "guaranteedCV": 9698,
+          "nonGuaranteedBonus": 17740,
+          "totalSurrender": 27438
         },
         {
           "year": 7,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 18432,
-          "totalSurrender": 32794
+          "guaranteedCV": 18432,
+          "nonGuaranteedBonus": 32794,
+          "totalSurrender": 51226
         },
         {
           "year": 8,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 18688,
-          "totalSurrender": 33911
+          "guaranteedCV": 18688,
+          "nonGuaranteedBonus": 33911,
+          "totalSurrender": 52599
         },
         {
           "year": 9,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 20992,
-          "totalSurrender": 34946
+          "guaranteedCV": 20992,
+          "nonGuaranteedBonus": 34946,
+          "totalSurrender": 55938
         },
         {
           "year": 10,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 27696,
-          "totalSurrender": 35365
+          "guaranteedCV": 27696,
+          "nonGuaranteedBonus": 35365,
+          "totalSurrender": 63060
         },
         {
           "year": 11,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 29440,
-          "totalSurrender": 35566
+          "guaranteedCV": 29440,
+          "nonGuaranteedBonus": 35566,
+          "totalSurrender": 65006
         },
         {
           "year": 12,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 32768,
-          "totalSurrender": 35732
+          "guaranteedCV": 32768,
+          "nonGuaranteedBonus": 35732,
+          "totalSurrender": 68500
         },
         {
           "year": 13,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 37683,
-          "totalSurrender": 37436
+          "guaranteedCV": 37683,
+          "nonGuaranteedBonus": 37436,
+          "totalSurrender": 75120
         },
         {
           "year": 14,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 42470,
-          "totalSurrender": 38492
+          "guaranteedCV": 42470,
+          "nonGuaranteedBonus": 38492,
+          "totalSurrender": 80962
         },
         {
           "year": 15,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 50227,
-          "totalSurrender": 38657
+          "guaranteedCV": 50227,
+          "nonGuaranteedBonus": 38657,
+          "totalSurrender": 88884
         },
         {
           "year": 16,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 50483,
-          "totalSurrender": 43501
+          "guaranteedCV": 50483,
+          "nonGuaranteedBonus": 43501,
+          "totalSurrender": 93984
         },
         {
           "year": 17,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 50739,
-          "totalSurrender": 49331
+          "guaranteedCV": 50739,
+          "nonGuaranteedBonus": 49331,
+          "totalSurrender": 100070
         },
         {
           "year": 18,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 50995,
-          "totalSurrender": 60434
+          "guaranteedCV": 50995,
+          "nonGuaranteedBonus": 60434,
+          "totalSurrender": 111430
         },
         {
           "year": 19,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 51149,
-          "totalSurrender": 67695
+          "guaranteedCV": 51149,
+          "nonGuaranteedBonus": 67695,
+          "totalSurrender": 118843
         },
         {
           "year": 20,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 51200,
-          "totalSurrender": 78702
+          "guaranteedCV": 51200,
+          "nonGuaranteedBonus": 78702,
+          "totalSurrender": 129902
         },
         {
           "year": 21,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 51373,
-          "totalSurrender": 85828
+          "guaranteedCV": 51373,
+          "nonGuaranteedBonus": 85828,
+          "totalSurrender": 137200
         },
         {
           "year": 22,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 51467,
-          "totalSurrender": 94404
+          "guaranteedCV": 51467,
+          "nonGuaranteedBonus": 94404,
+          "totalSurrender": 145871
         },
         {
           "year": 23,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 51570,
-          "totalSurrender": 107440
+          "guaranteedCV": 51570,
+          "nonGuaranteedBonus": 107440,
+          "totalSurrender": 159009
         },
         {
           "year": 24,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 51678,
-          "totalSurrender": 118960
+          "guaranteedCV": 51678,
+          "nonGuaranteedBonus": 118960,
+          "totalSurrender": 170637
         },
         {
           "year": 25,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 51792,
-          "totalSurrender": 135242
+          "guaranteedCV": 51792,
+          "nonGuaranteedBonus": 135242,
+          "totalSurrender": 187035
         },
         {
           "year": 26,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 51914,
-          "totalSurrender": 147289
+          "guaranteedCV": 51914,
+          "nonGuaranteedBonus": 147289,
+          "totalSurrender": 199203
         },
         {
           "year": 27,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 52043,
-          "totalSurrender": 160744
+          "guaranteedCV": 52043,
+          "nonGuaranteedBonus": 160744,
+          "totalSurrender": 212787
         },
         {
           "year": 28,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 52178,
-          "totalSurrender": 175851
+          "guaranteedCV": 52178,
+          "nonGuaranteedBonus": 175851,
+          "totalSurrender": 228029
         },
         {
           "year": 29,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 52321,
-          "totalSurrender": 192273
+          "guaranteedCV": 52321,
+          "nonGuaranteedBonus": 192273,
+          "totalSurrender": 244594
         },
         {
           "year": 30,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 52470,
-          "totalSurrender": 210138
+          "guaranteedCV": 52470,
+          "nonGuaranteedBonus": 210138,
+          "totalSurrender": 262608
         },
         {
           "year": 31,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 52520,
-          "totalSurrender": 228147
+          "guaranteedCV": 52520,
+          "nonGuaranteedBonus": 228147,
+          "totalSurrender": 280667
         },
         {
           "year": 32,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 52683,
-          "totalSurrender": 247455
+          "guaranteedCV": 52683,
+          "nonGuaranteedBonus": 247455,
+          "totalSurrender": 300138
         },
         {
           "year": 33,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 52853,
-          "totalSurrender": 267347
+          "guaranteedCV": 52853,
+          "nonGuaranteedBonus": 267347,
+          "totalSurrender": 320200
         },
         {
           "year": 34,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 53030,
-          "totalSurrender": 290775
+          "guaranteedCV": 53030,
+          "nonGuaranteedBonus": 290775,
+          "totalSurrender": 343805
         },
         {
           "year": 35,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 53214,
-          "totalSurrender": 315064
+          "guaranteedCV": 53214,
+          "nonGuaranteedBonus": 315064,
+          "totalSurrender": 368278
         },
         {
           "year": 36,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 53406,
-          "totalSurrender": 342579
+          "guaranteedCV": 53406,
+          "nonGuaranteedBonus": 342579,
+          "totalSurrender": 395985
         },
         {
           "year": 37,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 53605,
-          "totalSurrender": 368284
+          "guaranteedCV": 53605,
+          "nonGuaranteedBonus": 368284,
+          "totalSurrender": 421889
         },
         {
           "year": 38,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 53812,
-          "totalSurrender": 399846
+          "guaranteedCV": 53812,
+          "nonGuaranteedBonus": 399846,
+          "totalSurrender": 453658
         },
         {
           "year": 39,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 54026,
-          "totalSurrender": 433003
+          "guaranteedCV": 54026,
+          "nonGuaranteedBonus": 433003,
+          "totalSurrender": 487028
         },
         {
           "year": 40,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 54247,
-          "totalSurrender": 479013
+          "guaranteedCV": 54247,
+          "nonGuaranteedBonus": 479013,
+          "totalSurrender": 533261
         },
         {
           "year": 41,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 54477,
-          "totalSurrender": 513690
+          "guaranteedCV": 54477,
+          "nonGuaranteedBonus": 513690,
+          "totalSurrender": 568167
         },
         {
           "year": 42,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 54548,
-          "totalSurrender": 550410
+          "guaranteedCV": 54548,
+          "nonGuaranteedBonus": 550410,
+          "totalSurrender": 604958
         },
         {
           "year": 43,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 54792,
-          "totalSurrender": 589127
+          "guaranteedCV": 54792,
+          "nonGuaranteedBonus": 589127,
+          "totalSurrender": 643919
         },
         {
           "year": 44,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 55045,
-          "totalSurrender": 635273
+          "guaranteedCV": 55045,
+          "nonGuaranteedBonus": 635273,
+          "totalSurrender": 690318
         },
         {
           "year": 45,
           "premiumPaid": 51200,
-          "guaranteedCV": 0,
-          "nonGuaranteedBonus": 55305,
-          "totalSurrender": 698657
+          "guaranteedCV": 55305,
+          "nonGuaranteedBonus": 698657,
+          "totalSurrender": 753961
         }
       ],
       "unitData": [
@@ -7692,6 +7769,9 @@ const __embeddedData__ = {
       "totalPremium": 12000,
       "breakYear": null,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "退休規劃"
@@ -7956,6 +8036,9 @@ const __embeddedData__ = {
       "totalPremium": 24000,
       "breakYear": null,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "退休規劃"
@@ -8220,6 +8303,9 @@ const __embeddedData__ = {
       "totalPremium": 90000,
       "breakYear": null,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "退休規劃"
@@ -8484,6 +8570,9 @@ const __embeddedData__ = {
       "totalPremium": 180000,
       "breakYear": null,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "退休規劃"
@@ -8748,6 +8837,9 @@ const __embeddedData__ = {
       "totalPremium": 25000,
       "breakYear": 4,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -8947,6 +9039,9 @@ const __embeddedData__ = {
       "totalPremium": 25000,
       "breakYear": 5,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -9146,6 +9241,9 @@ const __embeddedData__ = {
       "totalPremium": 25000,
       "breakYear": 6,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -9345,6 +9443,9 @@ const __embeddedData__ = {
       "totalPremium": 25000,
       "breakYear": 10,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -9596,6 +9697,9 @@ const __embeddedData__ = {
       "totalPremium": 90000,
       "breakYear": 7,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "穩定收益",
@@ -9989,6 +10093,9 @@ const __embeddedData__ = {
       "totalPremium": 720000,
       "breakYear": 7,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "穩定收益",
@@ -10382,6 +10489,9 @@ const __embeddedData__ = {
       "totalPremium": 37500,
       "breakYear": 5,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "短期儲蓄",
@@ -10652,6 +10762,9 @@ const __embeddedData__ = {
       "totalPremium": 60000,
       "breakYear": null,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -11002,6 +11115,9 @@ const __embeddedData__ = {
       "totalPremium": 60000,
       "breakYear": null,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -11352,6 +11468,9 @@ const __embeddedData__ = {
       "totalPremium": 480000,
       "breakYear": null,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -11702,6 +11821,9 @@ const __embeddedData__ = {
       "totalPremium": 480000,
       "breakYear": null,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "整付入場",
         "分期入場",
@@ -12052,6 +12174,9 @@ const __embeddedData__ = {
       "totalPremium": 15000,
       "breakYear": null,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "退休規劃"
@@ -12344,6 +12469,9 @@ const __embeddedData__ = {
       "totalPremium": 30000,
       "breakYear": null,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "分期入場",
         "退休規劃"
@@ -12636,6 +12764,9 @@ const __embeddedData__ = {
       "totalPremium": 0,
       "breakYear": null,
       "isFinanceable": false,
+      "discount_y1": 0,
+      "discount_y2": 0,
+      "discount_y3": 0,
       "needTags": [
         "待補"
       ],
