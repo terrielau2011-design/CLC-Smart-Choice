@@ -58,13 +58,72 @@ h1 { font-size: 24px; margin-bottom: 8px; }
 .influencer-block .core-list li::before { content: "◆ "; color: #d4af37; font-weight: 700; }
 .no-result { background: #fff; padding: 40px; text-align: center; border-radius: 12px; color: #7a8a99; }
 footer { text-align: center; margin-top: 30px; color: #7a8a99; font-size: 12px; }
+
+/* Chart Section */
+.chart-section { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px; }
+.chart-section-title { font-size: 16px; font-weight: 700; color: #1e3a5f; margin-bottom: 4px; }
+.chart-section-desc { font-size: 12px; color: #7a8a99; margin-bottom: 16px; }
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-box { background: #fafbfc; border-radius: 8px; padding: 16px; border: 1px solid #e8ecf0; }
+.chart-box-title { font-size: 13px; font-weight: 700; color: #2c5282; margin-bottom: 8px; }
+.chart-canvas { width: 100%; height: 320px; }
+.chart-empty { text-align: center; padding: 40px 20px; color: #b0b8c0; font-size: 13px; }
+.chart-selected-info { font-size: 12px; color: #4a5568; margin-bottom: 12px; }
+.chart-selected-info .chip { display: inline-block; background: #e8f0fe; color: #1e3a5f; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-right: 4px; }
+.product-card.selectable { cursor: pointer; transition: border-color 0.2s; }
+.product-card.selected { border: 2px solid #165DFF; box-shadow: 0 4px 12px rgba(22,93,255,0.15); }
+.product-card .select-hint { font-size: 11px; color: #165DFF; margin-top: 8px; font-weight: 600; }
+.product-card.selected .select-hint { color: #165DFF; }
+.product-card:not(.selected) .select-hint::before { content: "點擊選取 → 加入圖表對比"; }
+.product-card.selected .select-hint::before { content: "✓ 已選取 — 再點擊取消"; }
+
+/* Parameter Panel */
+.param-panel { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px; }
+.param-panel-title { font-size: 16px; font-weight: 700; color: #1e3a5f; margin-bottom: 4px; }
+.param-panel-desc { font-size: 12px; color: #7a8a99; margin-bottom: 16px; }
+.param-product-group { border: 1px solid #e8ecf0; border-radius: 8px; padding: 16px; margin-bottom: 12px; background: #fafbfc; }
+.param-product-header { font-size: 14px; font-weight: 700; color: #2c5282; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.param-product-header .currency-badge { background: #e8f0fe; color: #1e3a5f; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.param-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 900px) { .param-grid { grid-template-columns: 1fr; } }
+.param-item { display: flex; flex-direction: column; gap: 4px; }
+.param-label { font-size: 12px; color: #4a5568; font-weight: 600; }
+.param-input { padding: 8px 10px; border: 1px solid #d4dae0; border-radius: 6px; font-size: 13px; width: 100%; }
+.param-input:focus { outline: none; border-color: #165DFF; box-shadow: 0 0 0 2px rgba(22,93,255,0.1); }
+.param-select { padding: 8px 10px; border: 1px solid #d4dae0; border-radius: 6px; font-size: 13px; width: 100%; background: #fff; cursor: pointer; }
+.param-select:focus { outline: none; border-color: #165DFF; box-shadow: 0 0 0 2px rgba(22,93,255,0.1); }
+.param-toggle { display: flex; align-items: center; gap: 6px; }
+.param-toggle input { width: 16px; height: 16px; cursor: pointer; }
+.param-toggle label { font-size: 12px; color: #4a5568; cursor: pointer; }
+.param-hint { font-size: 11px; color: #7a8a99; margin-top: 2px; }
+
+/* Risk Disclaimer */
+.risk-disclaimer { margin-top: 16px; padding: 16px; background: #FFFBE6; border: 1px solid #FFE58F; border-radius: 8px; }
+.risk-title { font-size: 14px; font-weight: 700; color: #D46B08; margin-bottom: 12px; }
+.risk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (max-width: 768px) { .risk-grid { grid-template-columns: 1fr; } }
+.risk-card { padding: 12px 14px; border-radius: 6px; border-left: 3px solid; background: #fff; }
+.risk-card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.risk-card ul { margin: 0; padding-left: 16px; }
+.risk-card li { font-size: 11px; color: #595959; line-height: 1.6; margin-bottom: 2px; }
+.risk-note { font-size: 10px; font-weight: 400; color: #8c8c8c; }
+.risk-insurance { border-color: #165DFF; }
+.risk-insurance .risk-card-title { color: #165DFF; }
+.risk-bond { border-color: #FF7D00; }
+.risk-bond .risk-card-title { color: #FF7D00; }
+.risk-deposit { border-color: #36CFC9; }
+.risk-deposit .risk-card-title { color: #08979C; }
+.risk-property { border-color: #F53F3F; }
+.risk-property .risk-card-title { color: #F53F3F; }
+.risk-footer { margin-top: 12px; font-size: 11px; color: #8c8c8c; text-align: center; }
 </style>
 </head>
 <body>
 
 <header>
   <h1>保險產品比較器</h1>
-  <div class="subtitle">v1.3.0｜INS01 中國人壽海外 + INS02 中國太平洋人壽｜共10款精選產品</div>
+  <div class="subtitle">v1.4.4｜INS01 中國人壽海外 + INS02 中國太平洋人壽｜共10款精選產品</div>
   <div class="stats">
     <span class="stat-badge" id="stat-total">-- 款產品</span>
     <span class="stat-badge" id="stat-shown">顯示全部</span>
@@ -90,16 +149,80 @@ footer { text-align: center; margin-top: 30px; color: #7a8a99; font-size: 12px; 
   <main class="main">
     <div class="result-header" id="resultHeader">載入中…</div>
     <div id="productContainer"></div>
+    <div class="param-panel" id="paramPanel" style="display:none;">
+      <div class="param-panel-title">💰 客戶參數輸入</div>
+      <div class="param-panel-desc">輸入客戶的保費金額、保費折扣及預繳設定，保單價值將按保費比例自動縮放，圖表反映真實回報</div>
+      <div id="paramProductList"></div>
+    </div>
+    <div class="chart-section" id="chartSection" style="display:none;">
+      <div class="chart-section-title">📈 產品回報圖表分析</div>
+      <div class="chart-section-desc">選擇產品卡片後，以下圖表將顯示該產品的回報數據分析</div>
+      <div class="chart-selected-info" id="chartSelectedInfo"></div>
+      <div class="chart-grid">
+        <div class="chart-box">
+          <div class="chart-box-title">繳費構成分析</div>
+          <div id="chartPie" class="chart-canvas"></div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-box-title">財富走勢圖</div>
+          <div id="chartWealth" class="chart-canvas"></div>
+        </div>
+        <div class="chart-box" style="grid-column: 1 / -1;">
+          <div class="chart-box-title">跨資產 IRR 比較</div>
+          <div id="chartIRR" class="chart-canvas"></div>
+          <div class="risk-disclaimer" id="riskDisclaimer">
+            <div class="risk-title">⚠️ 風險提示</div>
+            <div class="risk-grid">
+              <div class="risk-card risk-insurance">
+                <div class="risk-card-title">儲蓄保險</div>
+                <ul>
+                  <li>早期退保可能損失本金，回本期前不建議退保</li>
+                  <li>非保證紅利受保險公司投資表現影響，實際回報可能高於或低於預期</li>
+                  <li>長期持有（15年+）方能體現複利回報優勢</li>
+                </ul>
+              </div>
+              <div class="risk-card risk-bond">
+                <div class="risk-card-title">美國國債 4.5%</div>
+                <ul>
+                  <li>持有至到期保本，但到期前價格受利率波動影響</li>
+                  <li>面臨 USD/HKD 匯率風險（聯繫匯率制度下仍存在輕微波動）</li>
+                  <li>通脹可能侵蝕實際回報</li>
+                </ul>
+              </div>
+              <div class="risk-card risk-deposit">
+                <div class="risk-card-title">定存 3.5%<span class="risk-note">（結構性存款/高息推廣）</span></div>
+                <ul>
+                  <li>存款保障上限 80萬 HKD，超額部分無保障</li>
+                  <li>「結構性存款」可能有鎖定期及附帶條件，提前提取可能損失利息</li>
+                  <li>推廣利率為短期優惠，續存時利率可能大幅下降</li>
+                </ul>
+              </div>
+              <div class="risk-card risk-property">
+                <div class="risk-card-title">物業 2.75%</div>
+                <ul>
+                  <li>流動性低，變現需時（3-6個月或更長）</li>
+                  <li>需承擔維修、管理、空置、差餉等持有成本</li>
+                  <li>受市場週期、利率政策及政府調控影響</li>
+                  <li>按揭槓桿涉及利率風險，加息期供款負擔增加</li>
+                </ul>
+              </div>
+            </div>
+            <div class="risk-footer">以上 IRR 為參考值，實際回報受市場環境、持有期限及個人財務狀況影響。投資前請諮詢專業理財顧問。</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 
-<footer>保險產品比較器｜數據版本 CLC-SC-1.3.0｜2026-07-05</footer>
+<footer>保險產品比較器｜數據版本 CLC-SC-1.4.4｜2026-07-06</footer>
 
 <script>
 // Clear old cache to force load new data
 try { localStorage.removeItem('clc_products_cache'); } catch(e) {}
 </script>
-<script src="data.js?v=130"></script>
-<script src="app.js?v=130"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+<script src="data.js?v=144c"></script>
+<script src="app.js?v=144c"></script>
 </body>
 </html>
