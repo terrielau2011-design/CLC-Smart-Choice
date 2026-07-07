@@ -1,6 +1,7 @@
 'use strict';
 
-/* CLC Smart Choice v1.4.4 - App Layer */
+/* CLC Smart Choice v1.5.0b - App Layer */
+/* v1.5.0b: Fix prepay interest direction (subtract not add) + add annual premium input + break year from data.js */
 /* UI: Card layout with tag filtering + currency filter + ECharts */
 /* Data: from __embeddedData__ in data.js */
 /* v1.4: ECharts chart system (pie, wealth line, IRR bar) + product selection */
@@ -8,6 +9,7 @@
 /* v1.4.2: Proportional scaling — policyData scaled to client's actual premium */
 /* v1.4.3: Currency + payment term selectors in param panel, charts use correct variant */
 /* v1.4.4: Concentric pie chart, discount as %, total premium by payTerm, break-even marker, P002/P004 data fix */
+/* v1.5.0: Premium finance calculator (P003) — loan=firstDayCV*95%, interest-only monthly, exit year analysis, IRR */
 
 /* ========== Tag Rules (v1.3.0) ========== */
 /* '小額入場' removed; '資產傳承' & '教育基金' now auto-derived */
@@ -292,19 +294,60 @@ function getScaleFactor(product, params) {
 }
 
 /* ========== Find Break Even Year from policyData ==========
-   Break even = first year where totalSurrender >= premiumPaid */
-function findBreakEvenYear(product, scale) {
+   Break even = first year where totalSurrender >= actualPaid (after discounts & prepay interest)
+   actualPaid = totalPremium - discountY1 - discountY2 - discountY3 - prepayInterest */
+function findBreakEvenYear(product, scale, actualPaid) {
   var pd = product.policyData || [];
   if (pd.length === 0) return null;
   var s = scale || 1;
+  // Use actualPaid as the benchmark if provided, otherwise fall back to premiumPaid
+  var benchmark = actualPaid || 0;
+  if (benchmark <= 0) {
+    // Fallback: use premiumPaid from policyData (old behavior)
+    for (var i = 0; i < pd.length; i++) {
+      var ts2 = (pd[i].totalSurrender || 0) * s;
+      var pp2 = (pd[i].premiumPaid || 0) * s;
+      if (ts2 >= pp2 && pd[i].year > 0) {
+        return pd[i].year;
+      }
+    }
+    return null;
+  }
   for (var i = 0; i < pd.length; i++) {
     var ts = (pd[i].totalSurrender || 0) * s;
-    var pp = (pd[i].premiumPaid || 0) * s;
-    if (ts >= pp && pd[i].year > 0) {
+    if (ts >= benchmark && pd[i].year > 0) {
       return pd[i].year;
     }
   }
   return null;
+}
+
+/* ========== Newton-Raphson IRR on annual cash flows ==========
+   Cash flows: Y0..Y(payTerm-1) = -annualPremium (or 0 for prepaid at Y0)
+               Y(payTerm)..Y(19) = 0
+               Y(20)             = +totalSurrender at Y20
+   Returns annual IRR (compounded from annual rate) */
+function computeAnnualIRR(cashflows) {
+  var rate = 0.05; // initial guess 5% annual
+  var maxIter = 200;
+  var tolerance = 1e-10;
+  for (var iter = 0; iter < maxIter; iter++) {
+    var npv = 0, dnpv = 0;
+    for (var t = 0; t < cashflows.length; t++) {
+      var factor = Math.pow(1 + rate, t);
+      npv += cashflows[t] / factor;
+      if (t > 0) {
+        dnpv -= t * cashflows[t] / (factor * (1 + rate));
+      }
+    }
+    if (Math.abs(dnpv) < 1e-12) break;
+    var newRate = rate - npv / dnpv;
+    if (Math.abs(newRate - rate) < tolerance) { rate = newRate; break; }
+    rate = newRate;
+    if (rate < -0.99) rate = -0.99;
+    if (rate > 10) rate = 10;
+  }
+  return rate;
 }
 
 /* ========== Compute IRR 20 with User Parameters ========== */
@@ -324,33 +367,80 @@ function computeIRR20WithParams(product, params) {
   }
   if (!y20) return '待補';
 
-  // Scale factor: client premium / original premium
+  // Scale factor: client premium / original premium (applied to surrender values)
   var scale = getScaleFactor(product, params);
 
-  // Scale surrender values proportionally
+  // Total surrender at Y20 (scaled)
   var totalSurrender = ((y20.guaranteedCV || 0) + (y20.nonGuaranteedBonus || 0)) * scale;
 
-  // Use user-entered premium as cost basis
+  // Use user-entered total premium; if not entered, fall back to variant default
   var totalPrem = params.premium;
   if (totalPrem <= 0) {
     totalPrem = product.totalPremium || product.annualPremium || 0;
   }
 
-  // Subtract discounts (actual cost to client)
-  var totalDiscount = params.discountY1 + params.discountY2 + params.discountY3;
-  var actualCost = totalPrem - totalDiscount;
-  if (actualCost <= 0) return '待補';
+  // Calculate annual premium and pay term
+  var annualPrem = params.annualPremium || 0;
+  var payTerm = params.payTerm; // 0 = 整付, 1/2/3... = years
 
-  // Add prepay interest to return if prepaying
-  if (params.isPrepay && params.prepayInterest > 0) {
-    totalSurrender += Math.round(totalPrem * params.prepayInterest / 100);
+  // Subtract discounts (already reflected in user's actualCost but distributed across years)
+  var totalDiscount = params.discountY1 + params.discountY2 + params.discountY3;
+
+  // Prepay interest: 保險公司退還給客戶，從實付保費中扣減
+  var prepayInt = 0;
+  if (params.isPrepay && params.prepayInterest > 0 && annualPrem > 0 && payTerm > 1) {
+    var pt2 = payTerm;
+    prepayInt = annualPrem * (pt2 - 1) * pt2 / 2 * params.prepayInterest / 100;
   }
 
-  var ratio = totalSurrender / actualCost;
-  if (ratio <= 0) return '待補';
+  // Build annual cash flows (Y0 to Y20)
+  // Convention: Y0 = at policy inception, Y1 = end of year 1
+  var cashflows = new Array(21).fill(0);
+  var annualNetCost;
+  if (payTerm === 0) {
+    // 整付: 一次性支付 totalPrem - 折扣 (預繳退還利息如果勾選) at Y0
+    annualNetCost = -(totalPrem - totalDiscount);
+    if (params.isPrepay && prepayInt > 0) annualNetCost += prepayInt; // 退還 = 正現金流
+    cashflows[0] = annualNetCost;
+  } else {
+    // 分期: Y0 to Y(payTerm-1) each pay annualNetCost
+    // 預繳: 全部保費 Y0 一次付, 之後每年退還部分利息 (positive cashflow)
+    if (params.isPrepay) {
+      // 預繳 = Y0 一次過畀晒保費, 之後保險公司退還利息
+      // 淨成本: 一次付 totalPrem - discount, 之後每年收 (annualPrem × payTerm × interest% / 100 × 0) — 唔啾
+      // 簡化: 預繳視作 Y0 一次付 (totalPrem - discount - prepayInt as effective cost)
+      // 但預繳利息 = 公司退還 = 客戶收到 = 正現金流
+      // 用 Newton-Raphson 處理最準
+      // 簡單方法: 預繳 = Y0 一次付 (totalPrem - discount), 不過每年有現金流
+      // 改用更簡單 cash flow:
+      //   Y0: -totalPrem + totalDiscount + prepayInt (退還為正)
+      //   Y20: +ts
+      annualNetCost = -(totalPrem - totalDiscount);
+      cashflows[0] = annualNetCost + prepayInt;
+    } else {
+      // 普通分期: Y0..Y(payTerm-1) 每期付 (annualPrem - 對應 discount)
+      // 折扣分佈: Y0 → discountY1, Y1 → discountY2, Y2+ → discountY3
+      var dArr = [params.discountY1 || 0, params.discountY2 || 0, params.discountY3 || 0];
+      for (var y = 0; y < payTerm; y++) {
+        var dThis = y < 3 ? dArr[y] : 0;
+        cashflows[y] = -(annualPrem - dThis);
+      }
+    }
+  }
 
-  var irr = Math.pow(ratio, 1 / 20) - 1;
-  return (irr * 100).toFixed(1);
+  // Y20: surrender value as positive cashflow
+  cashflows[20] = totalSurrender;
+
+  // Check sanity
+  var hasNeg = cashflows.some(function(c) { return c < 0; });
+  var hasPos = cashflows.some(function(c) { return c > 0; });
+  if (!hasNeg || !hasPos) return '待補';
+  if (totalSurrender <= 0) return '待補';
+
+  // Newton-Raphson IRR
+  var annualRate = computeAnnualIRR(cashflows);
+  if (isNaN(annualRate) || !isFinite(annualRate)) return '待補';
+  return (annualRate * 100).toFixed(1);
 }
 
 /* ========== Build Scene Description ========== */
@@ -598,6 +688,8 @@ function renderCharts() {
   if (selected.length === 0) {
     section.style.display = 'none';
     if (paramPanel) paramPanel.style.display = 'none';
+    var finSection = document.getElementById('financeSection');
+    if (finSection) finSection.style.display = 'none';
     return;
   }
 
@@ -618,6 +710,9 @@ function renderCharts() {
   renderPieChart(selected);
   renderWealthChart(selected);
   renderIRRChart(selected);
+
+  // Show finance section if P003 is selected
+  showFinanceSection();
 }
 
 /* ========== Render Parameter Panel ========== */
@@ -675,6 +770,9 @@ function renderParamPanel(selected) {
       ptOptions += '<option value="' + pt + '"' + (pt === defaultPt ? ' selected' : '') + '>' + ptLabel + '</option>';
     }
 
+    // Min premium for this variant (for validation warning)
+    var minTotalPrem = totalPrem0 || (annualPrem0 * (defaultPt === 0 ? 1 : defaultPt));
+
     html += '<div class="param-product-group">' +
       '<div class="param-product-header">' +
         '<span>' + p.displayCode + ' — ' + p.name + '</span>' +
@@ -689,9 +787,15 @@ function renderParamPanel(selected) {
           '<select class="param-input param-select" id="pt_' + gid + '">' + ptOptions + '</select>' +
         '</div>' +
         '<div class="param-item">' +
+          '<span class="param-label">首年保費金額</span>' +
+          '<input type="number" class="param-input" id="ap_' + gid + '" value="' + annualPrem0 + '" min="0" step="0.01" placeholder="輸入首年保費">' +
+          '<span class="param-hint">改變後自動計算總保費</span>' +
+        '</div>' +
+        '<div class="param-item">' +
           '<span class="param-label">客戶總保費金額</span>' +
           '<input type="number" class="param-input" id="prem_' + gid + '" value="' + defaultPrem + '" min="0" step="0.01" placeholder="輸入總保費金額">' +
           '<span class="param-hint" id="hint_' + gid + '">' + hintText + '</span>' +
+          '<div class="param-warning" id="warn_' + gid + '" style="display:none;color:#F53F3F;font-size:12px;margin-top:4px;">⚠ 總保費低於此產品最低保費要求（' + sym + formatNum(minTotalPrem) + '）</div>' +
         '</div>' +
         '<div class="param-item">' +
           '<span class="param-label">首年保費折扣 (%)</span>' +
@@ -725,6 +829,49 @@ function renderParamPanel(selected) {
     '</div>';
   }
   container.innerHTML = html;
+
+  // Helper: check min premium warning for a product group
+  function checkMinPremiumWarning(gid, cur, pt) {
+    var groupName = gid.replace(/_/g, ' ');
+    var grouped = groupProducts(window.__products || []);
+    var group = null;
+    for (var gi = 0; gi < grouped.length; gi++) {
+      if (grouped[gi].name === groupName) { group = grouped[gi]; break; }
+    }
+    if (!group) return;
+    var variant = getProductVariant(group, cur, pt);
+    var minTotal = variant.totalPremium || (variant.annualPremium * (pt === 0 ? 1 : pt));
+
+    var premEl = document.getElementById('prem_' + gid);
+    var warnEl = document.getElementById('warn_' + gid);
+    if (!premEl || !warnEl) return;
+
+    var currentPrem = parseFloat(premEl.value) || 0;
+    var sym = cur === 'USD' ? 'US$' : (cur === 'HKD' ? 'HK$' : (cur === 'CNY' || cur === 'RMB' ? 'RMB' : cur));
+    if (currentPrem > 0 && currentPrem < minTotal) {
+      warnEl.textContent = '⚠ 總保費低於此產品最低保費要求（' + sym + formatNum(minTotal) + '）';
+      warnEl.style.display = 'block';
+    } else {
+      warnEl.style.display = 'none';
+    }
+  }
+
+  // Helper: auto-calculate total premium from annual premium × payTerm
+  function autoCalcTotalPrem(gid) {
+    var apEl = document.getElementById('ap_' + gid);
+    var ptEl = document.getElementById('pt_' + gid);
+    var premEl = document.getElementById('prem_' + gid);
+    if (!apEl || !ptEl || !premEl) return;
+    var annualPrem = parseFloat(apEl.value) || 0;
+    var pt = parseInt(ptEl.value);
+    var totalPrem;
+    if (pt === 0 || pt === 1) {
+      totalPrem = annualPrem;
+    } else {
+      totalPrem = Math.round(annualPrem * pt * 100) / 100;
+    }
+    premEl.value = totalPrem;
+  }
 
   // Bind events: currency/payTerm change → update premium default + re-render charts
   var selects = container.querySelectorAll('.param-select');
@@ -762,6 +909,10 @@ function renderParamPanel(selected) {
         var premEl = document.getElementById('prem_' + gid);
         if (premEl) premEl.value = Math.round(newPrem * 100) / 100;
 
+        // Update annual premium input
+        var apEl = document.getElementById('ap_' + gid);
+        if (apEl) apEl.value = annualPrem;
+
         // Update hint with annual premium info
         var sym2 = cur === 'USD' ? 'US$' : (cur === 'HKD' ? 'HK$' : (cur === 'CNY' || cur === 'RMB' ? 'RMB' : cur));
         var hintEl = document.getElementById('hint_' + gid);
@@ -777,9 +928,46 @@ function renderParamPanel(selected) {
         if (d1El) d1El.value = (variant.discount_y1 || 0).toFixed(2);
         if (d2El) d2El.value = (variant.discount_y2 || 0).toFixed(2);
         if (d3El) d3El.value = (variant.discount_y3 || 0).toFixed(2);
+
+        // Check min premium warning
+        checkMinPremiumWarning(gid, cur, pt);
       }
 
       // Re-render charts
+      var selected = getSelectedGroupedProducts();
+      renderPieChart(selected);
+      renderWealthChart(selected);
+      renderIRRChart(selected);
+    });
+  }
+
+  // Bind events: annual premium (ap_) change → auto-calc total premium + check warning
+  var apInputs = container.querySelectorAll('input[id^="ap_"]');
+  for (var ai = 0; ai < apInputs.length; ai++) {
+    apInputs[ai].addEventListener('input', function() {
+      var gid = this.id.replace('ap_', '');
+      autoCalcTotalPrem(gid);
+      // Check warning with current currency/payTerm
+      var curEl = document.getElementById('cur_' + gid);
+      var ptEl = document.getElementById('pt_' + gid);
+      checkMinPremiumWarning(gid, curEl ? curEl.value : 'USD', parseInt(ptEl ? ptEl.value : '0'));
+      // Re-render charts
+      var selected = getSelectedGroupedProducts();
+      renderPieChart(selected);
+      renderWealthChart(selected);
+      renderIRRChart(selected);
+    });
+  }
+
+  // Bind events: total premium (prem_) change → check warning + re-render charts
+  var premInputs = container.querySelectorAll('input[id^="prem_"]');
+  for (var pi2 = 0; pi2 < premInputs.length; pi2++) {
+    premInputs[pi2].addEventListener('input', function() {
+      var gid = this.id.replace('prem_', '');
+      var curEl = document.getElementById('cur_' + gid);
+      var ptEl = document.getElementById('pt_' + gid);
+      checkMinPremiumWarning(gid, curEl ? curEl.value : 'USD', parseInt(ptEl ? ptEl.value : '0'));
+      // Re-render charts — total premium affects scale factor
       var selected = getSelectedGroupedProducts();
       renderPieChart(selected);
       renderWealthChart(selected);
@@ -802,10 +990,12 @@ function renderParamPanel(selected) {
     });
   }
 
-  // Bind input change events to re-render charts
-  var allInputs = container.querySelectorAll('.param-input:not(.param-select)');
-  for (var k = 0; k < allInputs.length; k++) {
-    allInputs[k].addEventListener('input', function() {
+  // Bind input change events for discount/prepay inputs to re-render charts
+  var otherInputs = container.querySelectorAll('.param-input:not(.param-select)');
+  for (var k = 0; k < otherInputs.length; k++) {
+    // Skip ap_ and prem_ inputs (already handled above)
+    if (otherInputs[k].id.indexOf('ap_') === 0 || otherInputs[k].id.indexOf('prem_') === 0) continue;
+    otherInputs[k].addEventListener('input', function() {
       var selected = getSelectedGroupedProducts();
       renderPieChart(selected);
       renderWealthChart(selected);
@@ -816,12 +1006,13 @@ function renderParamPanel(selected) {
 
 /* ========== Get User Parameters for Product ========== */
 /* Note: discountY1/Y2/Y3 are now percentages (e.g., 5.00 = 5%)
-   isPrepayDiscount flag indicates whether discounts are % or fixed amounts */
+   Calculated from annualPremium (not totalPremium) per Excel FYPD standard */
 function getUserParams(groupName) {
   var gid = groupName.replace(/\s+/g, '_');
   var curEl = document.getElementById('cur_' + gid);
   var ptEl = document.getElementById('pt_' + gid);
   var premEl = document.getElementById('prem_' + gid);
+  var apEl = document.getElementById('ap_' + gid);
   var d1El = document.getElementById('d1_' + gid);
   var d2El = document.getElementById('d2_' + gid);
   var d3El = document.getElementById('d3_' + gid);
@@ -829,22 +1020,40 @@ function getUserParams(groupName) {
   var prepayIntEl = document.getElementById('prepayint_' + gid);
 
   var premium = premEl ? parseFloat(premEl.value) || 0 : 0;
+  var annualPrem = apEl ? parseFloat(apEl.value) || 0 : 0;
   var d1Pct = d1El ? parseFloat(d1El.value) || 0 : 0;
   var d2Pct = d2El ? parseFloat(d2El.value) || 0 : 0;
   var d3Pct = d3El ? parseFloat(d3El.value) || 0 : 0;
 
+  var currency = curEl ? curEl.value : 'USD';
+  var payTerm = ptEl ? parseInt(ptEl.value) : 0;
+
+  // Fallback: if annualPrem not entered, get from variant
+  if (annualPrem <= 0) {
+    var grouped = groupProducts(window.__products || []);
+    var group = null;
+    for (var gi = 0; gi < grouped.length; gi++) {
+      if (grouped[gi].name === groupName) { group = grouped[gi]; break; }
+    }
+    if (group) {
+      var variant = getProductVariant(group, currency, payTerm);
+      annualPrem = variant.annualPremium || 0;
+    }
+  }
+
   return {
-    currency: curEl ? curEl.value : 'USD',
-    payTerm: ptEl ? parseInt(ptEl.value) : 0,
+    currency: currency,
+    payTerm: payTerm,
     premium: premium,
+    annualPremium: annualPrem,
     // Discount percentages (e.g., 5.00 = 5%)
     discountY1Pct: d1Pct,
     discountY2Pct: d2Pct,
     discountY3Pct: d3Pct,
-    // Discount amounts (calculated from percentage × premium)
-    discountY1: Math.round(premium * d1Pct / 100 * 100) / 100,
-    discountY2: Math.round(premium * d2Pct / 100 * 100) / 100,
-    discountY3: Math.round(premium * d3Pct / 100 * 100) / 100,
+    // Discount amounts: based on annualPremium per Excel FYPD convention
+    discountY1: Math.round(annualPrem * d1Pct / 100 * 100) / 100,
+    discountY2: Math.round(annualPrem * d2Pct / 100 * 100) / 100,
+    discountY3: Math.round(annualPrem * d3Pct / 100 * 100) / 100,
     isPrepay: prepayEl ? prepayEl.checked : false,
     prepayInterest: prepayIntEl ? parseFloat(prepayIntEl.value) || 0 : 0
   };
@@ -884,13 +1093,16 @@ function renderPieChart(selected) {
     var discountY3 = params.discountY3;
     var totalDiscount = discountY1 + discountY2 + discountY3;
     var actualPaid = totalPrem - totalDiscount;
-    if (actualPaid < 0) actualPaid = 0;
 
-    // Prepay interest amount
+    // Prepay interest amount — 递減餘額法 (declining balance)
+    // 預繳利息 = 保險公司退還給客戶 → 從實付保費中扣減
     var prepayInterestAmt = 0;
-    if (params.isPrepay && params.prepayInterest > 0 && totalPrem > 0) {
-      prepayInterestAmt = Math.round(totalPrem * params.prepayInterest / 100);
+    if (params.isPrepay && params.prepayInterest > 0 && params.annualPremium > 0 && params.payTerm > 1) {
+      var pt = params.payTerm;
+      prepayInterestAmt = Math.round(params.annualPremium * (pt - 1) * pt / 2 * params.prepayInterest / 100 * 100) / 100;
+      actualPaid -= prepayInterestAmt;
     }
+    if (actualPaid < 0) actualPaid = 0;
 
     var prefix = n > 1 ? (p.displayCode + ' ') : '';
     var ringData = [];
@@ -977,20 +1189,40 @@ function renderWealthChart(selected) {
 
     var pd = variant.policyData;
     var totalPrem = params.premium;
-    // Calculate actual paid (after discounts)
+    // Calculate actual paid (after discounts - prepay interest)
     var totalDiscount = params.discountY1 + params.discountY2 + params.discountY3;
     var actualPaid = totalPrem - totalDiscount;
+    // Subtract prepay interest from cost (保險公司退還預繳利息) — 递減餘額法
+    if (params.isPrepay && params.prepayInterest > 0 && params.annualPremium > 0 && params.payTerm > 1) {
+      var pt4 = params.payTerm;
+      var prepayInt2 = params.annualPremium * (pt4 - 1) * pt4 / 2 * params.prepayInterest / 100;
+      actualPaid -= Math.round(prepayInt2);
+    }
     if (actualPaid < 0) actualPaid = 0;
 
     // Scale factor: client premium / original premium
     var scale = getScaleFactor(variant, params);
 
     // Build year->totalSurrender map (scaled)
+    // Detect outlier: any value > 10× median of all values is treated as data error
+    var rawValues = pd.map(function(d) { return d.totalSurrender || 0; }).filter(function(v) { return v > 0; });
+    rawValues.sort(function(a, b) { return a - b; });
+    var median = rawValues.length > 0 ? rawValues[Math.floor(rawValues.length / 2)] : 0;
+    var outlierThreshold = median > 0 ? median * 10 : 0;
+
     var yearMap = {};
     var gcvMap = {};
     for (var j = 0; j < pd.length; j++) {
-      yearMap[pd[j].year] = Math.round((pd[j].totalSurrender || 0) * scale);
-      gcvMap[pd[j].year] = Math.round((pd[j].guaranteedCV || 0) * scale);
+      var ts = pd[j].totalSurrender || 0;
+      var gcv = pd[j].guaranteedCV || 0;
+      // Filter outliers in both ts and gcv
+      if (outlierThreshold > 0 && (ts > outlierThreshold || gcv > outlierThreshold)) {
+        yearMap[pd[j].year] = null;
+        gcvMap[pd[j].year] = null;
+      } else {
+        yearMap[pd[j].year] = Math.round(ts * scale);
+        gcvMap[pd[j].year] = Math.round(gcv * scale);
+      }
     }
 
     // Extract values at yearAxis points
@@ -1008,8 +1240,8 @@ function renderWealthChart(selected) {
     legendData.push(label);
     legendData.push(labelGuaranteed);
 
-    // Find break even year (scaled)
-    var breakEvenYear = findBreakEvenYear(variant, scale);
+    // Use breakYear from data.js (pre-calculated, more reliable than interpolating from sparse policyData)
+    var breakEvenYear = variant.breakYear || null;
     var breakEvenIdx = -1;
     var breakEvenVal = null;
     if (breakEvenYear !== null) {
@@ -1068,10 +1300,10 @@ function renderWealthChart(selected) {
       data: guaranteedValues
     });
 
-    // Add target line (actual paid after discount) only for single product
+    // Add target line (actual paid after discount + prepay interest) only for single product
     if (selected.length === 1) {
       var premLine = [];
-      for (var n = 0; n < yearAxis.length; n++) premLine.push(actualPaid);
+      for (var n = 0; n < yearAxis.length; n++) premLine.push(Math.round(actualPaid));
       series.push({
         name: '實付保費',
         type: 'line',
@@ -1081,11 +1313,12 @@ function renderWealthChart(selected) {
       });
       legendData.push('實付保費');
 
-      // If prepay with interest, add total cost line
-      if (params.isPrepay && params.prepayInterest > 0) {
+      // If prepay with interest, add prepay cost line (totalPrem - discount, before prepay interest deduction)
+      if (params.isPrepay && params.prepayInterest > 0 && params.annualPremium > 0 && params.payTerm > 1) {
         var prepayLine = [];
+        var prepayCost = totalPrem - totalDiscount;
         for (var n2 = 0; n2 < yearAxis.length; n2++) {
-          prepayLine.push(Math.round(totalPrem * (1 + params.prepayInterest / 100)));
+          prepayLine.push(Math.round(prepayCost));
         }
         series.push({
           name: '預繳總成本',
@@ -1128,6 +1361,7 @@ function renderWealthChart(selected) {
       axisLabel: {
         fontSize: 10,
         formatter: function(v) {
+          if (v >= 1000000) return (v / 1000000).toFixed(1) + 'M';
           if (v >= 1000) return (v / 1000).toFixed(0) + 'K';
           return v;
         }
@@ -1292,10 +1526,458 @@ function updateClock() {
   el.textContent = y + '-' + m + '-' + d + ' ' + h + ':' + mi + ':' + s;
 }
 
-/* ========== Init ========== */
+/* ========== Premium Finance Calculator (P003) ========== */
+var FINANCE_CONFIG = {
+  bank: '廣發銀行香港分行',
+  maxLTV: 0.95,
+  baseRate: 5.25,        // P rate
+  rateDeduction: 0.01975, // P - 1.975%
+  worstRateAddition: 0.01, // +1% for worst case
+  feeRate: 0.02,          // 2% of loan amount
+  PDiscount: 0.035,       // 預繳保費折現率 3.5%
+  fypdPct: 30,            // 首年保費折扣 30% (FYPD30)
+  // First day cash value lookup table
+  firstDayCV: {
+    700000: 550846.47,
+    1000000: 786923.52
+  }
+};
+
+function getFinanceProduct() {
+  var products = window.__products || [];
+  for (var i = 0; i < products.length; i++) {
+    if (products[i].id === 'p003usd5') return products[i];
+  }
+  return null;
+}
+
+function showFinanceSection() {
+  var selected = getSelectedGroupedProducts();
+  var hasP003 = false;
+  for (var i = 0; i < selected.length; i++) {
+    if (selected[i].name === '豐饒傳承儲蓄保險計劃 III') {
+      hasP003 = true;
+      break;
+    }
+  }
+  var section = document.getElementById('financeSection');
+  if (section) {
+    section.style.display = hasP003 ? 'block' : 'none';
+    if (hasP003) {
+      computeFinance();
+    }
+  }
+}
+
+function computeFinance() {
+  var exitSelect = document.getElementById('financeExitYear');
+  var scenarioSelect = document.getElementById('financeScenario');
+  if (!exitSelect || !scenarioSelect) return;
+
+  var exitYear = parseInt(exitSelect.value);
+  var scenario = scenarioSelect.value;
+
+  var product = getFinanceProduct();
+  if (!product) return;
+
+  var payTerm = 5;
+  var fypdPct = FINANCE_CONFIG.fypdPct;
+  var pDiscount = FINANCE_CONFIG.PDiscount;
+
+  // Render both 700K and 1000K scenarios
+  var premiums = [700000, 1000000];
+  var results = {};
+  for (var pi = 0; pi < premiums.length; pi++) {
+    var premium = premiums[pi];
+    var annualPremium = premium / payTerm;
+
+    // 預繳現值 PV (PDiscount 折現)
+    var pv = 0;
+    for (var y = 0; y < payTerm; y++) {
+      if (y === 0) {
+        pv += annualPremium;
+      } else {
+        pv += annualPremium / Math.pow(1 + pDiscount, y);
+      }
+    }
+
+    // FYPD30 = 首年保費 × 30%
+    var fypdAmount = annualPremium * fypdPct / 100;
+
+    // 實付保費 = PV - FYPD
+    var actualPaid = pv - fypdAmount;
+
+    // First day cash value from lookup
+    var firstDayCV = FINANCE_CONFIG.firstDayCV[premium] || 0;
+
+    // Loan amount = firstDayCV * 95%, rounded down to nearest 1000
+    var rawLoan = firstDayCV * FINANCE_CONFIG.maxLTV;
+    var loanAmount = Math.floor(rawLoan / 1000) * 1000;
+
+    // Self-paid = actualPaid - loan
+    var selfPaid = actualPaid - loanAmount;
+
+    // Loan fee = loan * 2%
+    var loanFee = loanAmount * FINANCE_CONFIG.feeRate;
+
+    // Initial cost = selfPaid + fee
+    var initialCost = selfPaid + loanFee;
+
+    // Interest rate
+    var rate;
+    if (scenario === 'worst') {
+      rate = 0.039;
+    } else {
+      rate = Math.round((FINANCE_CONFIG.baseRate / 100 - FINANCE_CONFIG.rateDeduction) * 1e6) / 1e6;
+    }
+
+    var monthlyInterest = loanAmount * rate / 12;
+    var annualInterest = monthlyInterest * 12;
+    var totalInterest = monthlyInterest * 12 * exitYear;
+
+    var scaleFactor = premium / product.totalPremium;
+
+    var surrenderValue = 0;
+    if (product.policyData) {
+      for (var i = 0; i < product.policyData.length; i++) {
+        if (product.policyData[i].year === exitYear) {
+          surrenderValue = product.policyData[i].totalSurrender * scaleFactor;
+          break;
+        }
+      }
+    }
+
+    var netProfit = surrenderValue - loanAmount - initialCost - totalInterest;
+    var annualizedReturn = initialCost > 0 ? (netProfit / initialCost) / exitYear : 0;
+    var irr = computeFinanceIRR(initialCost, monthlyInterest, loanAmount, surrenderValue, exitYear);
+    var leverageRatio = initialCost > 0 ? premium / initialCost : 0;
+
+    results[premium] = {
+      premium: premium,
+      annualPremium: annualPremium,
+      pv: pv,
+      fypdAmount: fypdAmount,
+      actualPaid: actualPaid,
+      firstDayCV: firstDayCV,
+      rawLoan: rawLoan,
+      loanAmount: loanAmount,
+      selfPaid: selfPaid,
+      loanFee: loanFee,
+      initialCost: initialCost,
+      rate: rate,
+      monthlyInterest: monthlyInterest,
+      annualInterest: annualInterest,
+      totalInterest: totalInterest,
+      scaleFactor: scaleFactor,
+      surrenderValue: surrenderValue,
+      netProfit: netProfit,
+      annualizedReturn: annualizedReturn,
+      irr: irr,
+      leverageRatio: leverageRatio
+    };
+  }
+
+  // Render results tables
+  var resultsEl = document.getElementById('financeResults');
+  if (!resultsEl) return;
+
+  var curSym = 'US$';
+  var fmt = function(v) { return curSym + Math.round(v).toLocaleString(); };
+  var fmtNum = function(v) { return v.toFixed(2); };
+  var fmtPct = function(v) { return (v * 100).toFixed(3) + '%'; };
+
+  var scenarioLabel = scenario === 'worst' ? '最壞情況（3.9%）' : '正常情況（3.275%）';
+  var rateDisplay = scenario === 'worst' ? '3.900%' : '3.275%';
+
+  var html = '';
+  for (var pi2 = 0; pi2 < premiums.length; pi2++) {
+    var prem = premiums[pi2];
+    var r = results[prem];
+    var premLabel = prem === 700000 ? 'USD 70萬' : 'USD 100萬';
+
+    html += '<div class="finance-block' + (pi2 > 0 ? ' finance-block-gap' : '') + '">';
+    html += '<div class="finance-block-title">' + premLabel + '（' + scenarioLabel + '）</div>';
+    html += '<table class="finance-table">';
+
+    html += '<tr><th>項目</th><th>金額 / 數值</th><th>說明</th></tr>';
+    html += '<tr><td>保費金額</td><td>' + fmt(r.premium) + '</td><td>客戶選擇的總保費（' + payTerm + '年繳）</td></tr>';
+    html += '<tr><td>每年保費</td><td>' + fmt(r.annualPremium) + '</td><td>總保費 ÷ ' + payTerm + '年</td></tr>';
+    html += '<tr><td>預繳現值</td><td>' + fmt(r.pv) + '</td><td>按 PDiscount ' + (pDiscount * 100) + '% 折現</td></tr>';
+    html += '<tr><td>首年保費折扣 (FYPD' + fypdPct + ')</td><td>' + fmt(r.fypdAmount) + '</td><td>首年保費 × ' + fypdPct + '%</td></tr>';
+    html += '<tr class="highlight"><td>實付保費</td><td>' + fmt(r.actualPaid) + '</td><td>預繳現值 - 首年折扣</td></tr>';
+    html += '<tr><td>首日現金價值</td><td>' + fmt(r.firstDayCV) + '</td><td>保單生效日退保金額</td></tr>';
+    html += '<tr><td>貸款比例</td><td>95%</td><td>廣發銀行最高 LTV</td></tr>';
+    html += '<tr><td>預計貸款金額</td><td>' + fmt(r.rawLoan) + '</td><td>首日現金價值 × 95%</td></tr>';
+    html += '<tr><td>實際貸款金額</td><td>' + fmt(r.loanAmount) + '</td><td>取整千位</td></tr>';
+    html += '<tr class="highlight"><td>客戶自付本金</td><td>' + fmt(r.selfPaid) + '</td><td>實付保費 - 貸款金額</td></tr>';
+    html += '<tr><td>貸款手續費</td><td>' + fmt(r.loanFee) + '</td><td>貸款金額 × 2%</td></tr>';
+    html += '<tr class="highlight"><td>初始投入</td><td>' + fmt(r.initialCost) + '</td><td>自付本金 + 手續費</td></tr>';
+    html += '<tr><td>槓桿倍數</td><td>' + r.leverageRatio.toFixed(2) + 'x</td><td>保費 / 初始投入</td></tr>';
+    html += '<tr><td colspan="3" style="background:#f0f5ff;font-weight:600;">利息支出（' + scenarioLabel + '）</td></tr>';
+    html += '<tr><td>貸款利率</td><td>' + rateDisplay + '</td><td>' + (scenario === 'worst' ? '加息1% = 3.9%' : 'P-1.975% = 3.275%') + '</td></tr>';
+    html += '<tr><td>每月利息</td><td>' + fmtNum(r.monthlyInterest) + '</td><td>貸款 × 利率 / 12</td></tr>';
+    html += '<tr><td>每年利息</td><td>' + fmt(r.annualInterest) + '</td><td>每月利息 × 12</td></tr>';
+    html += '<tr><td>總利息（' + exitYear + '年）</td><td>' + fmt(r.totalInterest) + '</td><td>每年利息 × ' + exitYear + '</td></tr>';
+    html += '<tr><td colspan="3" style="background:#f0f5ff;font-weight:600;">退出時結算（第 ' + exitYear + ' 年）</td></tr>';
+    html += '<tr><td>退保金額</td><td>' + fmt(r.surrenderValue) + '</td><td>第' + exitYear + '年保單總退保價值（按比例縮放）</td></tr>';
+    html += '<tr><td>還貸款本金</td><td>' + fmt(r.loanAmount) + '</td><td>退保時一次過還本</td></tr>';
+    html += '<tr><td>已付總利息</td><td>' + fmt(r.totalInterest) + '</td><td>' + exitYear + '年累計利息</td></tr>';
+    html += '<tr><td>初始投入回收</td><td>' + fmt(r.initialCost) + '</td><td>自付本金 + 手續費</td></tr>';
+    html += '<tr class="highlight"><td>淨收益</td><td class="' + (r.netProfit >= 0 ? 'positive' : 'negative') + '">' + fmt(r.netProfit) + '</td><td>退保金額 - 貸款 - 總利息 - 初始投入</td></tr>';
+    html += '<tr class="highlight"><td>年化單利</td><td class="' + (r.annualizedReturn >= 0 ? 'positive' : 'negative') + '">' + fmtPct(r.annualizedReturn) + '</td><td>淨收益 / 初始投入 / ' + exitYear + '年</td></tr>';
+    html += '<tr class="highlight"><td>IRR（月度現金流）</td><td class="' + (r.irr >= 0 ? 'positive' : 'negative') + '">' + fmtPct(r.irr) + '</td><td>基於月度現金流 XIRR 計算</td></tr>';
+
+    html += '</table>';
+    html += '</div>';
+  }
+
+  resultsEl.innerHTML = html;
+
+  // Render chart with both premiums
+  var r700 = results[700000];
+  var r1m = results[1000000];
+  renderFinanceChart(product, r700, r1m, exitYear);
+}
+
+function computeFinanceIRR(initialCost, monthlyInterest, loanAmount, surrenderValue, exitYear) {
+  // Build monthly cashflow array (matches Excel rows 31-139)
+  // Row 31 (month 0): -initialCost
+  // Rows 32-138 (months 1 to exitYear*12-1): -monthlyInterest
+  // Row 139 (month exitYear*12): surrenderValue - loanAmount - monthlyInterest
+  var cashflows = [-initialCost];
+  var totalMonths = exitYear * 12;
+  for (var m = 1; m < totalMonths; m++) {
+    cashflows.push(-monthlyInterest);
+  }
+  // Last month: receive surrender value, pay back loan + last month interest
+  cashflows.push(surrenderValue - loanAmount - monthlyInterest);
+
+  // Newton-Raphson IRR (monthly rate)
+  var rate = 0.005; // initial guess 0.5% monthly
+  var maxIter = 200;
+  var tolerance = 1e-10;
+
+  for (var iter = 0; iter < maxIter; iter++) {
+    var npv = 0;
+    var dnpv = 0;
+    for (var t = 0; t < cashflows.length; t++) {
+      var factor = Math.pow(1 + rate, t);
+      npv += cashflows[t] / factor;
+      if (t > 0) {
+        dnpv -= t * cashflows[t] / (factor * (1 + rate));
+      }
+    }
+    if (Math.abs(dnpv) < 1e-12) break;
+    var newRate = rate - npv / dnpv;
+    if (Math.abs(newRate - rate) < tolerance) {
+      rate = newRate;
+      break;
+    }
+    rate = newRate;
+    if (rate < -0.99) rate = -0.99;
+    if (rate > 10) rate = 10;
+  }
+
+  // Convert monthly IRR to annual IRR (compounded)
+  var annualIRR = Math.pow(1 + rate, 12) - 1;
+  return annualIRR;
+}
+
+function renderFinanceChart(product, r700, r1m, exitYear) {
+  var el = document.getElementById('chartFinance');
+  if (!el || typeof echarts === 'undefined') return;
+
+  if (!__charts.finance) {
+    __charts.finance = echarts.init(el);
+  }
+
+  // Build year-by-year data for both premiums
+  var years = [];
+  var surrender700 = [], net700 = [], irr700 = [];
+  var surrender1m = [], net1m = [], irr1m = [];
+
+  for (var y = 1; y <= 30; y++) {
+    years.push('Y' + y);
+
+    // 700K
+    var sv700 = 0;
+    if (product.policyData) {
+      for (var i = 0; i < product.policyData.length; i++) {
+        if (product.policyData[i].year === y) {
+          sv700 = product.policyData[i].totalSurrender * r700.scaleFactor;
+          break;
+        }
+      }
+    }
+    var ti700 = r700.monthlyInterest * 12 * y;
+    var np700 = sv700 - r700.loanAmount - r700.initialCost - ti700;
+    surrender700.push(Math.round(sv700));
+    net700.push(Math.round(np700));
+    irr700.push(parseFloat((computeFinanceIRR(r700.initialCost, r700.monthlyInterest, r700.loanAmount, sv700, y) * 100).toFixed(2)));
+
+    // 1000K
+    var sv1m = 0;
+    if (product.policyData) {
+      for (var j = 0; j < product.policyData.length; j++) {
+        if (product.policyData[j].year === y) {
+          sv1m = product.policyData[j].totalSurrender * r1m.scaleFactor;
+          break;
+        }
+      }
+    }
+    var ti1m = r1m.monthlyInterest * 12 * y;
+    var np1m = sv1m - r1m.loanAmount - r1m.initialCost - ti1m;
+    surrender1m.push(Math.round(sv1m));
+    net1m.push(Math.round(np1m));
+    irr1m.push(parseFloat((computeFinanceIRR(r1m.initialCost, r1m.monthlyInterest, r1m.loanAmount, sv1m, y) * 100).toFixed(2)));
+  }
+
+  var option = {
+    title: {
+      text: '保費融資 — 不同退出年份的回報走勢（70萬 vs 100萬）',
+      left: 'center',
+      textStyle: { fontSize: 12, fontWeight: 'normal', color: '#86909C' }
+    },
+    tooltip: {
+      trigger: 'axis',
+      formatter: function(params) {
+        var html = params[0].axisValue + '<br/>';
+        for (var i = 0; i < params.length; i++) {
+          var p = params[i];
+          var val = p.value;
+          if (p.seriesName.indexOf('IRR') >= 0) {
+            html += p.marker + p.seriesName + ': ' + val + '%<br/>';
+          } else {
+            html += p.marker + p.seriesName + ': US$' + Math.round(val).toLocaleString() + '<br/>';
+          }
+        }
+        return html;
+      }
+    },
+    legend: {
+      data: ['70萬退保', '70萬淨收益', '70萬IRR', '100萬退保', '100萬淨收益', '100萬IRR'],
+      top: 25,
+      textStyle: { fontSize: 10 }
+    },
+    grid: { left: 70, right: 60, top: 70, bottom: 40 },
+    xAxis: {
+      type: 'category',
+      data: years,
+      axisLabel: { fontSize: 10, rotate: 30 }
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '金額 (US$)',
+        nameTextStyle: { fontSize: 10 },
+        axisLabel: { fontSize: 10, formatter: function(v) { return (v/1000) + 'K'; } }
+      },
+      {
+        type: 'value',
+        name: 'IRR %',
+        nameTextStyle: { fontSize: 10 },
+        axisLabel: { fontSize: 10, formatter: '{value}%' },
+        splitLine: { show: false }
+      }
+    ],
+    series: [
+      {
+        name: '70萬退保',
+        type: 'line',
+        data: surrender700,
+        smooth: true,
+        itemStyle: { color: '#165DFF' },
+        lineStyle: { width: 2 }
+      },
+      {
+        name: '70萬淨收益',
+        type: 'line',
+        data: net700,
+        smooth: true,
+        itemStyle: { color: '#52c41a' },
+        lineStyle: { width: 2 },
+        markLine: {
+          silent: true,
+          data: [{ yAxis: 0 }],
+          lineStyle: { color: '#d4dae0', type: 'dashed' }
+        }
+      },
+      {
+        name: '70萬IRR',
+        type: 'line',
+        yAxisIndex: 1,
+        data: irr700,
+        smooth: true,
+        itemStyle: { color: '#FF7D00' },
+        lineStyle: { width: 1.5, type: 'dashed' },
+        markPoint: {
+          data: [{
+            name: '退出',
+            coord: ['Y' + exitYear, irr700[exitYear - 1]],
+            symbol: 'circle',
+            symbolSize: 12,
+            itemStyle: { color: '#F53F3F' },
+            label: { show: true, formatter: exitYear + '年\n{c}%', fontSize: 9, color: '#fff' }
+          }]
+        }
+      },
+      {
+        name: '100萬退保',
+        type: 'line',
+        data: surrender1m,
+        smooth: true,
+        itemStyle: { color: '#6AA8FF' },
+        lineStyle: { width: 2, type: 'dotted' }
+      },
+      {
+        name: '100萬淨收益',
+        type: 'line',
+        data: net1m,
+        smooth: true,
+        itemStyle: { color: '#95DE64' },
+        lineStyle: { width: 2, type: 'dotted' }
+      },
+      {
+        name: '100萬IRR',
+        type: 'line',
+        yAxisIndex: 1,
+        data: irr1m,
+        smooth: true,
+        itemStyle: { color: '#FFB266' },
+        lineStyle: { width: 1.5, type: 'dotted' },
+        markPoint: {
+          data: [{
+            name: '退出',
+            coord: ['Y' + exitYear, irr1m[exitYear - 1]],
+            symbol: 'circle',
+            symbolSize: 12,
+            itemStyle: { color: '#F53F3F' },
+            label: { show: true, formatter: exitYear + '年\n{c}%', fontSize: 9, color: '#fff' }
+          }]
+        }
+      }
+    ]
+  };
+
+  __charts.finance.setOption(option, true);
+}
+
+function setupFinanceControls() {
+  var els = ['financeExitYear', 'financeScenario'];
+  for (var i = 0; i < els.length; i++) {
+    var el = document.getElementById(els[i]);
+    if (el) {
+      el.addEventListener('change', computeFinance);
+      el.addEventListener('input', computeFinance);
+    }
+  }
+}
+
+
 function init() {
   setupClearBtn();
   setupCurrencyFilter();
+  setupFinanceControls();
 
   // Clock
   updateClock();
